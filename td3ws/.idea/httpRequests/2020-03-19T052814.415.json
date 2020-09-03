@@ -1,0 +1,7 @@
+{
+  "timestamp": "2020-03-19T16:28:14.138+0000",
+  "status": 415,
+  "error": "Unsupported Media Type",
+  "message": "Content type '*/*;charset=UTF-8' not supported",
+  "path": "/allucine/sondage/monsondage/film"
+}

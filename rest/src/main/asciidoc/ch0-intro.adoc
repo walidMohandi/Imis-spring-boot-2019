@@ -1,0 +1,151 @@
+= Webservices
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+== Le cours
+
+Repo git sur Bitbucket :
+
+https://pdicost.univ-orleans.fr/git/projects/WSI1920/repos/cours/
+
+CAUTION: Code source du cours en Asciidoc
+
+
+pour générer les slides ET les supports pdf : `mvn`
+
+pour prendre des notes : papier & crayon et/ou modifier le source ; par exemple avec une balise [NOTE.speaker]
+
+
+[NOTE.speaker]
+Une note .speaker est incluse dans le pdf généré mais n'apparait pas explicitement dans les slides
+
+
+== Pendant la présentation des slides...
+
+* Appuyez sur la touche `*s*` pour les speaker notes
+* Appuyez sur la touche `*b*` ou `*.*` pour blank/unblank
+* Appuyez sur la touche `*esc*` key to get an overview of your slides
+* Appuyez sur la touche fleche bas pour voir les sous-slides (if exist !)
+* Menu en bas à gauche pour changer le style, écrire sur les slides...
+
+[NOTE.speaker]
+--
+Les notes de slides sont visibles dans la fenêtre speaker, mais aussi dans le poly en pdf
+--
+
+
+
+== Sommaire du cours
+
+[%step]
+* Deux architectures
+** REST
+** SOAP
+* Deux implémentations
+** Spring [SpringBoot]
+** JEE [ReastEasy Quarkus]
+* Deux approches
+** API first
+** Code first
+
+
+== Organisation
+
+* 12h de Cours
+* 18h (6h+12h) de TD/TP, moi, yohan, matthieu, vivien
+* Du travail perso…
+** Beaucoup
+** Beaucoup, Beaucoup
+** Si si !
+* Un CC + Un examen de synthèse
+
+
+== Objectifs
+
+* REST
+** Comprendre l’architecture des applications REST
+** Exposer/Consommer des services REST
+** Sécurisation des APIs
+** Design d’API
+** Intégrer des services externes (twitter, facebook, google…)
+
+* SOAP
+** Initiation au protocole et aux Web services SOAP
+** Créer et tester des services SOAP
+
+
+== Qu'est ce que c'est ?
+
+Un Web Service est une « unité logique applicative » (ensemble de services) accessible
+en utilisant les protocoles standard
+
+Une «librairie» [API] fournissant des données et des services à d’autres applications
+
+Ils s’appuient sur un ensemble de standards
+
+[WARNING]
+CE N’EST PAS CE QUE L’ON APPELLE TRADITIONNELEMENT LE « WEB » (Page html/css…) :
+on ne peut pas y accéder par un navigateur !!!
+
+
+== Buts
+
+* But : communication inter-applications
+. Technologie _non adaptée_ à une interrogation directe par un utilisateur
+. Couplage faible
+
+* Trois besoins :
+. Echange de données
+. Description des services d’échanges
+. Découverte des services
+
+== Caractéristiques
+
+Les Web services sont « simples » et « interopérables »
+
+* Normalisés (W3C, Oasis)
+* Indépendamment de :
+** la plate-forme (UNIX, Windows, Smartphone…)
+** leur implémentation (Java, C++, Visual Basic,…)
+** l’architecture sous-jacente (.NET, JEE,…)
+
+== Une révolutions ?
+
+* Non, reposent sur des technologies « anciennes » (XML, annuaires,…)
+ou détournées (JSON)
+* D’autres « technos » équivalentes : CORBA, RMI, DCOM
+* Mais la normalisation et l’utilisation de standards permettent
+l’interopérabilité entre frameworks/plateformes/systèmes (Java, .NET,VMS…) des clients et des serveurs
+
+== Finalités
+
+* Faire interagir des composants hétérogènes,
+distants et indépendants avec un protocole standard (SOAP,http..)
+
+* Permettre à une application de trouver automatiquement sur un réseau
+le service dont elle a besoin et d'échanger des données avec lui
+
+== Finalités (2)
+
+* Les Web Services ont été conçus pour intégrer la dimension d'Internet, et la standardisation des échanges
+
+* Les services Web permettent d’interconnecter :
+** Différentes entreprises
+** Différents matériels
+** Différentes applications
+** Différents clients
+* Dédiés aux applications B2B (Business to Business),
+EAI (Enterprise Application Integration) ; plus généralement M2M (Machine to Machine)
+
+== Finalités (3)
+
+En réalité, en entreprise :
+
+* interop Front (JEE/.NET) – Back (Cobol) (eg UR) [ESB],
+* Architectures clients légers/mobiles (jQuery, AngularJS, vueJS…)
+
+* Approche SOA / micro-services
+
+
+

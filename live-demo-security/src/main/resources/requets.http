@@ -1,0 +1,38 @@
+GET http://localhost:8080/api/messages
+//Authorization: Basic user 592f1726-018d-4630-90bc-baec40212203
+###
+
+POST http://localhost:8080/api/messages
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiZXhwIjoxNTg4OTgwOTU5fQ.Drkb58WBSe4SA5-tmOLayK-fClFt45EFxbvZzbN-Yaw
+Content-Type: application/json
+
+{"texte":"non message"}
+
+###
+GET http://localhost:8080/api/messages/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3YWxpZCIsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJleHAiOjE1ODg4OTMxMDl9.w5C5NyRydZJkB_UZHQuI-4zB1eilex0nuXwSWjj1EbM
+
+###
+DELETE http://localhost:8080/api/messages/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiZXhwIjoxNTg4ODkzMjA0fQ.rG5TPaIb59hXeGWOmw4wE1Tisz8DmIlnQVNcfUutJoM
+
+###
+POST http://localhost:8080/api/utilisateur
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "login":"fred",
+  "password": "fred",
+  "isAdmin": true
+}
+
+###
+
+GET http://localhost:8080/api/utilisateur/walid
+Authorization: Basic admin admin
+
+###
+POST http://localhost:8080/api/login?username=admin&password=admin
+
+###

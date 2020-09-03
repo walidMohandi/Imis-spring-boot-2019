@@ -1,0 +1,10 @@
+{
+  "nomSondage": "monsondage",
+  "proprietaire": {
+    "id": 1,
+    "nom": "Poirot",
+    "prenom": "Hercule",
+    "pseudo": "Hercule"
+  },
+  "films": []
+}

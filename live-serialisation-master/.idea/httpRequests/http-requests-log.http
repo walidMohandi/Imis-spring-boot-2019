@@ -1,0 +1,72 @@
+GET http://localhost:8080/utilisateurs/fred/messages
+
+<> 2020-05-08T031528.200.json
+
+###
+
+POST http://localhost:8080/utilisateurs/fred/messages
+Content-Type: application/json
+
+{"texte":"encore moi !"}
+
+<> 2020-05-08T031522.201.json
+
+###
+
+GET http://localhost:8080/utilisateurs/fred/messages
+
+<> 2020-05-08T031508.200.json
+
+###
+
+GET http://localhost:8080/utilisateurs/fred/messages
+
+<> 2020-05-08T031259.200.json
+
+###
+
+GET http://localhost:8080/utilisateurs/fred/messages
+
+<> 2020-05-08T022428.200.json
+
+###
+
+POST http://localhost:8080/utilisateurs/fred/messages
+Content-Type: application/json
+
+{"texte":"encore moi !"}
+
+<> 2020-05-08T022419.201.json
+
+###
+
+GET http://localhost:8080/utilisateurs/fred/messages
+
+<> 2020-05-08T022242.200.json
+
+###
+
+POST http://localhost:8080/utilisateurs/fred/messages
+Content-Type: application/json
+
+{"texte":"encore moi !"}
+
+<> 2020-05-08T022227.201.json
+
+###
+
+GET http://localhost:8080/utilisateurs/fred/messages
+
+<> 2020-05-08T010231.200.json
+
+###
+
+POST http://localhost:8080/utilisateurs/fred/messages
+Content-Type: application/json
+
+{"texte":"encore moi !"}
+
+<> 2020-05-08T010213.201.json
+
+###
+

@@ -1,0 +1,255 @@
+= Webservices : Sécurité
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+
+
+
+== Et la sécurité ?
+
+
+Distinguer 2 problèmes :
+
+* Authentification : vérifier l’identité
+d’une “personne”
+
+* Autorisations associées à l’entité
+authentifiée
+
+En REST, protection de l’accès aux ressources
+
+== Problèmes spécifiques REST
+
+Au niveau transport : https, utilisation de
+TLS
+
+Au niveau accès (user) aux contenus :
+
+Authentification login/password
+Éviter de les envoyer à chaque échange :
+clé d’authentification (token)
+
+Protocole(s) de communication login/pass –
+clé entre client/serveur/serveur tiers
+
+Deux solutions :
+
+
+
+
+Utilisation protocole standard, e.g. OAuth
+2.0 [externe]
+Protocole interne défini
+
+OAuth 2.0
+
+Définition d’un protocole
+
+
+
+
+2 ou 3 intervenants
+Avantage : sécurité
+Inconvénient : non standard
+
+REST : Mapping URL - droits
+
+
+
+Principes récurrents : URL – droits d’accès
+Eg Spring Security :
+
+protected void configure(HttpSecurity http)
+throws Exception {
+http
+.antMatcher("/**")
+.authorizeRequests()
+.antMatchers("/", "/login**", "/webjars/**")
+.permitAll()
+.anyRequest()
+.authenticated();
+}
+
+REST : Mapping URL - droits
+
+
+
+
+En servlet : interception de “toutes” les
+requêtes entrantes pour vérifier la
+présence d’un token
+Exemple en Spring boot MVC :
+
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/**");
+}
+}
+
+REST : Mapping URL - droits
+
+
+Exemple en Spring boot MVC : Handler
+
+public class SecurityInterceptor implements HandlerInterceptor {
+private static final Logger logger = LoggerFactory.getLogger(SecurityInterceptor.class);
+@Override
+public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse
+httpServletResponse, Object o) throws Exception {
+logger.info("request");
+if (httpServletRequest.getHeader("jepasse")!=null) {
+return true;
+}
+return false; // blocage de la requête AVANT traitement
+}
+@Override
+public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse
+httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
+logger.info("response");
+}
+@Override
+public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse
+httpServletResponse, Object o, Exception e) throws Exception {
+logger.info("afterComp");
+}
+}
+
+Token
+
+
+
+
+2 techniques pour le Token :
+–
+
+Génération aléatoire, puis stockage
+(BD, map…) d’association
+
+–
+
+Utilisation encryptage pour signature
+(e.g. JWT)
+
+En général, passé par Header
+(“Authorization” ou autre...)
+
+Token : exemple de JWT
+
+
+
+
+
+
+
+
+Génération de tokens signés par clé
+privée : JSON Web Tokens standard RFC
+7519
+jwt.io : support multi-langages /multiplateforme
+Stateless ! =>perfs : scalable
+Principe : fabriquer un token avec des
+données, le signer pour garantir la nonmodification
+
+Token JWT
+
+
+Exemple de token :
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey
+JzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikpva
+G4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E
+2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+
+
+
+
+
+Contient des infos en clair
+(header+payload) décodables en clair
+(base 64) + signature décodable
+uniquement avec la clé privée
+Vérification de signature pour valider les
+claims
+
+Token JWT : décodage
+
+Token JWT : en Java ?
+
+
+Librairie jjwt
+
+<dependency>
+<groupId>io.jsonwebtoken</groupId>
+<artifactId>jjwt</artifactId>
+<version>0.9.0</version>
+</dependency>
+
+
+
+Génération d’un token :
+
+Claims claims = Jwts.claims().setSubject(login);
+claims.put("roles", user.getRoles()); ...
+String token = Jwts.builder()
+.setClaims(claims)
+.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+.signWith(SignatureAlgorithm.HS512, SECRET_KEY.getBytes())
+.compact();
+
+
+
+Décodage du token :
+
+Jws<Claims> jwsClaims = Jwts.parser()
+.setSigningKey(SECRET_KEY.getBytes())
+.parseClaimsJws(tokenToCheck.replace(TOKEN_PREFIX, ""));
+String login = jwsClaims.getBody().getSubject(); ...
+
+Token JWT : limitations
+
+
+Stateless => toutes les informations
+stockées dans le token
+
+
+
+Logout ?
+Changement des données ?
+Invalidation d’un token ?
+
+
+
+
+Petite conclusions ?
+
+Gestion des états dans REST
+
+
+HTTP est Stateless
+
+
+
+Ajout d’information dans les ressources
+retournées représentant les transitions
+valides
+
+
+
+Technique HTTP classiques de sessions
+
+Sécurité
+
+•
+•
+
+•
+
+Utilisation de la sécurité HTTP (S)
+TLS
+Authentification, en général basée sur
+URI [interception par Spring Security
+par exemple]
+Oauth (2.0) de plus en plus utilisé sur
+les API REST (eg Google, Facebook…)

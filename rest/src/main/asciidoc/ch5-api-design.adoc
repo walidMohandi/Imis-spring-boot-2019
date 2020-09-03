@@ -1,0 +1,1103 @@
+= Webservices : API Design
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+== Je suis maître du monde [des APIs] !
+
+Design de Web Services REST
+By example
+
+== Deux approches “complémentaires”
+
+
+* Contract First :
+** Spécifier complètement l’API dans un
+langage de description adapté
+** WADL (rest), WSDL (Soap) ou Open API (swagger)
+
+* Code First :
+** j’allume le PC et hop...
+
+== Deux approches “complémentaires”
+
+En pratique :
+
+* Spécification informelle de l’API
+
+* Ecriture de l’API ou de l’implémentation
+
+* Génération de la spec de l’API ou du code de l’API
+
+Outillage :
+
+* Swagger https://editor.swagger.io/ (<->)
+
+* Spring REST docs (code->docs)
+
+* ...
+
+== Responsabilité du dev
+
+Contrôle total des URI et des contenus
+
+[%step]
+* Le bon dev, il dev
+* et le mauvais dev, il dev aussi
+
+Définition d’une API : effet coulée de lave !
+
+.La coulée de lave se produit lorsqu'une partie de code encore immature est mise en production, forçant la lave à se solidifier en empêchant sa modification
+image::coulee-lave.jpg[Coulée de lave]
+
+
+
+== URLs propres ?
+
+http://map.search.ch/lugano
+
+image::maps-apis.png[Maps]
+
+http://maps.google.com/maps?f=q&hl=en&q=lugano,+switzerland&layer=&ie=UTF8&z=12&om=1&iwloc=addr
+
+
+== URL propre – Bonnes pratiques
+
+* Utiliser le chemin de la ressource pour spécifier les paramètres
+* Une fois définie, une URL _ne doit plus changer_
+
+* REST utilise des URL opaques :
+l’accès à une nouvelle ressource ne doit pas être construite par le client,
+mais transmise par le serveur
+
+* UTILISER les bons codes HTTP de retour
+
+== Création d’une ressource REST
+
+. Identification des ressources
+. Définition d’url propres
+. Pour chaque url, prévoir les actions pour GET, POST, PUT/PATCH & DELETE
+. Documenter chaque ressource
+. Définir les liens entre ressources
+. Déployer et tester chaque ressources sur un serveur REST
+
+== Bonnes pratiques - GET
+
+* Opération de *lecture*
+
+* Idempotente
+
+* Possibilité de cache
+
+== Bonnes pratiques - POST
+
+* Opération de création
+
+* Effet de bord possible sur le serveur
+
+* Positionné le header `Location` dans la response
+
+
+== Bonnes pratiques – POST vs PUT
+
+* Identifier une ressource créée
+
+* Préferer
+----
+POST /sondage/672609683/vote
+
+201 CREATED
+Location: /sondage/672609683/vote/1
+----
+à
+----
+PUT /sondage/672609683/vote/1
+
+200 OK
+----
+
+== Négociation de contenu
+
+On *DOIT* ajouter en entête dans la requête le type de contenu qu’on
+souhaite recevoir, par ordre de référence :
+
+----
+GET /resource
+Accept: application/xml, application/json
+
+200 OK
+Content-Type: application/json
+----
+
+
+== Ton API tu versionneras
+
+Les APIs doivent être versionnées
+
+pour leurs permettre d'avoluer dans le temps [vs coulée de lave]
+
+Deux solutions usuelles :
+
+* ajouter la version de l'API dans l'URL (/api/v1/...)
+* préciser la version dans le type mime du header `Accept` de la requête
+[ eg Github]
+
+=== Des noms tu utiliseras, jamais de verbes
+
+Utilisez des *NOMS* pour les URIs,
+jamais de *VERBES* !
+
+Voici quelques *contre*-exemples *INTERDITS* :
+----
+/getProducts
+/listOrders
+/retreiveClientByOrder?orderId=1
+----
+
+utilisez à la place :
+----
+GET /products : will return the list of all products
+POST /products : will add a product to the collection
+GET /products/4 : will retreive product #4
+PATCH/PUT /products/4 : will update product #4
+----
+
+
+=== GET et HEAD tu respecteras
+
+RFC2616 défini clairement que les opérations HEAD et GET
+ne *doivent pas* altérer l'état du système.
+
+Très mauvaise pratique : `GET /deleteProduct?id=1`
+
+Imaginez le résultat de l'indexation des URLs par un moteur de recherche !
+
+
+=== Des sous-ressources tu utiliseras
+
+Si vous voulez récupérer une sous-collection d'un objet,
+utilisez une sous-uri pour cette ressource.
+
+Par exemple, pour obtenir la liste des albums d'un artiste,
+utilisez `GET /artists/8/albums`
+
+
+=== Des résultats paginés tu renverras
+
+Ne pas retourner, sans contrôle, des collections qui peuvent être grandes !
+
+Cela pose des problèmes de latence sur le transport des données,
+mais aussi de sérialisation/désérialisation sur le serveur et le client.
+
+la solution est de *paginer* systématiquement
+les requêtes (cf Facebook, Twitter, Github,...) avec des paramètres
+du type from/to, start/size...
+
+Une autre bonne pratique est d'indiquer dans l'entête HTTP de la réponse
+l'URI de la page précédente et de la page suivante.
+
+
+=== Les bons codes HTTP tu respecteras
+
+Always use proper HTTP status codes when returning content (for both
+successful and error requests). Here a quick list of non common codes that you
+may want to use in your application.
+
+* Success codes
+** 201 Created should be used when creating content (INSERT),
+** 202 Accepted should be used when a request is queued for background processing
+(async tasks),
+** 204 No Content should be used when the request was properly executed but no
+content was returned (a good example would be when you delete something).
+
+* Client error codes
+** 400 Bad Request should be used when there was an error while processing the
+request payload (malformed JSON, for instance).
+** 401 Unauthorized should be used when a request is not authenticiated (wrong access
+token, or username or password).
+** 403 Forbidden should be used when the request is successfully authenticiated (see
+401), but the action was forbidden.
+** 406 Not Acceptable should be used when the requested format is not available (for
+instance, when requesting an XML resource from a JSON only server).
+** 410 Gone Should be returned when the requested resource is permenantely deleted
+and will never be available again.
+** 422 Unprocesable entity Could be used when there was a validation error while
+creating an object.
+
+liste complète dans la RFC2616 : https://tools.ietf.org/html/rfc2616#section-10
+
+
+=== Toujours une erreur tu préciseras
+
+* When an exception is raised, you should always
+return a consistent payload describing the error.
+This way, it will be easier for other to parse the
+error message (the structure will always be the
+same, whatever the error is).
+* Here one I often use in my web applications. It is
+clear, simple and self descriptive :
+----
+HTTP/1.1 401 Unauthorized
+{
+"status": "Unauthorized",
+"message": "No access token provided.",
+"request_id": "594600f4-7eec-47ca-801202e7b89859ce"
+}
+----
+
+=== Gestion de version : URLs et MIME types
+
+Gestion de versions de l’API utilisée
+
+* Dans la base URL : /v2/api
+* Dans le type MIME :
+** application/vnd.github.v3+json
+** application/vnd.acme.user+xml;v=1
+
+** Autre solution : RFC 6381
++
+----
+Accept: application/json;profiles="http://profiles.acme.com/user/v/1"
+----
+
+== Et les interfaces ?
+
+Ben quand tu définis une API, tu donnes la spec eh cong !
+
+=== Description de l’interface d’un WS REST
+
+3 possibilités :
+
+* Descripteur WADL
+* Descripteur Swagger / OpenAPI Spec. (OAS)
+* HATEOAS
+
+=== WADL
+
+Web Application Definition Language est un
+langage de description des services REST, au
+format XML.
+
+* une spécification du W3C initiée par SUN (www.w.org/Submission/wadl)
+* Il décrit les éléments à partir de leur type
+(Ressources, Verbes, Paramètre, type de requête, Réponse)
+* Il fournit les informations descriptives d’un service permettant de construire des
+applications clientes exploitant les services REST
+
+=== WADL
+
+Web Application Description Language
+
+* Équivalent du WSDL pour services SOAP
+* Interface décrivant les opérations disponibles d’un service REST, ses
+entrées/sorties, les types, les MIME type acceptés/renvoyés/…
+* Créé automatiquement (en statique ou dynamique) par certaines des librairies
+à partir de la définition des services (comme WSDL)
+
+=== WADL : exemple
+
+=== WADL
+
+* Génération auto (code first) uniquement pour certaines implémentations
+* Utilisation principale : avec SoapUI
+
+=== Swagger / Open API
+
+* editor.swagger.io
+
+* Fonctionne dans les 2 sens :
+** API first → génération d’un sequelette
+de serveur ET de client, multiplateforme
+** Code First → Génération de la spec en
+OpenAPI / Swagger
+
+* Utilisable avec SoapUI
+
+* Documentation en HTML avec tests d’appel
+
+
+=== Swagger / Open API
+
+[source,yaml]
+----
+swagger: "2.0"
+info:
+description: "This is a sample server Petstore server. You can find out more about
+Swagger
+at [http://swagger.io](http://swagger.io) or on [irc.freenode.net,
+#swagger](http://swagger.io/irc/).
+For this sample, you can use the api key `special-key` to
+test the authorization
+filters."
+version: "1.0.0"
+title: "Swagger Petstore"
+termsOfService: "http://swagger.io/terms/"
+contact:
+email: "apiteam@swagger.io"
+license:
+name: "Apache 2.0"
+url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "petstore.swagger.io"
+basePath: "/v2"
+tags:
+- name: "pet"
+description: "Everything about your Pets"
+externalDocs:
+description: "Find out more"
+url: "http://swagger.io"
+- name: "store"
+description: "Access to Petstore orders"
+- name: "user"
+description: "Operations about user"
+externalDocs:
+description: "Find out more about our store"
+url: "http://swagger.io"
+schemes:
+- "http"
+----
+
+=== Swagger / Open API
+[source,yaml]
+----
+paths:
+/pet:
+post:
+tags:
+- "pet"
+summary: "Add a new pet to the store"
+description: ""
+operationId: "addPet"
+consumes:
+- "application/json"
+- "application/xml"
+produces:
+- "application/xml"
+- "application/json"
+parameters:
+- in: "body"
+name: "body"
+description: "Pet object that needs to be added to the store"
+required: true
+schema:
+$ref: "#/definitions/Pet"
+responses:
+405:
+description: "Invalid input"
+security:
+- petstore_auth:
+- "write:pets"
+- "read:pets"
+----
+
+=== Swagger / Open API
+
+[source,yaml]
+----
+put:
+tags:
+- "pet"
+summary: "Update an existing pet"
+description: ""
+operationId: "updatePet"
+consumes:
+- "application/json"
+- "application/xml"
+produces:
+- "application/xml"
+- "application/json"
+parameters:
+- in: "body"
+name: "body"
+description: "Pet object that needs to be added to the store"
+required: true
+schema:
+$ref: "#/definitions/Pet"
+responses:
+400:
+description: "Invalid ID supplied"
+404:
+description: "Pet not found"
+405:
+description: "Validation exception"
+security:
+- petstore_auth:
+- "write:pets"
+- "read:pets"
+----
+
+=== Swagger / Open API
+
+[source,yaml]
+----
+/pet/findByTags:
+get:
+tags:
+- "pet"
+summary: "Finds Pets by tags"
+description: "Muliple tags can be provided with comma separated strings. Use
+tag2, tag3 for testing."
+operationId: "findPetsByTags"
+produces:
+- "application/xml"
+- "application/json"
+parameters:
+- name: "tags"
+in: "query"
+description: "Tags to filter by"
+required: true
+type: "array"
+items:
+type: "string"
+collectionFormat: "multi"
+responses:
+200:
+description: "successful operation"
+schema:
+type: "array"
+items:
+$ref: "#/definitions/Pet"
+400:
+description: "Invalid tag value"
+security:
+- petstore_auth:
+- "write:pets"
+- "read:pets"
+deprecated: true
+----
+tag1,
+
+=== Swagger / Open API
+
+[source,yaml]
+----
+/pet/{petId}:
+get:
+tags:
+- "pet"
+summary: "Find pet by ID"
+description: "Returns a single pet"
+operationId: "getPetById"
+produces:
+- "application/xml"
+- "application/json"
+parameters:
+- name: "petId"
+in: "path"
+description: "ID of pet to return"
+required: true
+type: "integer"
+format: "int64"
+responses:
+200:
+description: "successful operation"
+schema:
+$ref: "#/definitions/Pet"
+400:
+description: "Invalid ID supplied"
+404:
+description: "Pet not found"
+security:
+- api_key: []
+----
+
+=== Swagger / Open API
+
+[source,yaml]
+----
+post:
+tags:
+- "pet"
+summary: "Updates a pet in the store with form data"
+description: ""
+operationId: "updatePetWithForm"
+consumes:
+- "application/x-www-form-urlencoded"
+produces:
+- "application/xml"
+- "application/json"
+parameters:
+- name: "petId"
+in: "path"
+description: "ID of pet that needs to be updated"
+required: true
+type: "integer"
+format: "int64"
+- name: "name"
+in: "formData"
+description: "Updated name of the pet"
+required: false
+type: "string"
+- name: "status"
+in: "formData"
+description: "Updated status of the pet"
+required: false
+type: "string"
+responses:
+405:
+description: "Invalid input"
+security:
+- petstore_auth:
+- "write:pets"
+- "read:pets"
+----
+
+=== Swagger / Open API
+
+[source,yaml]
+----
+securityDefinitions:
+petstore_auth:
+type: "oauth2"
+authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+flow: "implicit"
+scopes:
+write:pets: "modify pets in your account"
+read:pets: "read your pets"
+api_key:
+type: "apiKey"
+name: "api_key"
+in: "header"
+----
+
+=== Swagger / Open API
+
+[source,yaml]
+----
+definitions:
+Order:
+type: "object"
+properties:
+id:
+type: "integer"
+format: "int64"
+petId:
+type: "integer"
+format: "int64"
+quantity:
+type: "integer"
+format: "int32"
+shipDate:
+type: "string"
+format: "date-time"
+status:
+type: "string"
+description: "Order Status"
+enum:
+- "placed"
+- "approved"
+- "delivered"
+complete:
+type: "boolean"
+default: false
+xml:
+name: "Order"
+Category:
+type: "object"
+properties:
+id:
+type: "integer"
+format: "int64"
+name:
+type: "string"
+----
+
+=== Exemple code → docs/spec
+
+Avec Spring boot : springfox
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger2</artifactId>
+    <version>2.8.0</version>
+</dependency>
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger-ui</artifactId>
+    <version>2.8.0</version>
+</dependency>
+----
+
+
+Dans le code : @EnableSwagger2 +
+
+[source,java]
+----
+@Bean
+public Docket api() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .select()
+        .apis(RequestHandlerSelectors.any())
+        .paths(PathSelectors.any())
+        .build();
+}
+----
+Démo : boot-swagger,
+
+http://localhost:8080/v2/api-docs
+
+http://localhost:8080/swagger-ui.html
+
+
+=== Exemple code → docs/spec
+
+Dans le code :
+[source,java]
+----
+@Api("API de gestion des sondages et des votes")
+@ApiOperation(value = "Renvoie la liste de tous les sondages")
+----
+
+
+=== HATEOAS
+
+Level UP
+
+Niveau 2 : OK, mais le client doit connaitre
+l’API pour l’utiliser ; toute modification plante
+le client
+
+Idée de “Hypermedia as the engine of
+application state“ : casser ce couplage
+
+Le client “navigue” dans les URLs fournies
+dynamiquement par le serveur
+Cf Spring HATEOAS
+
+=== HATEOAS exemples
+
+[source,json]
+----
+{
+  "content":"Hello, World!",
+  "_links":{
+    "self":{
+      "href":"http://localhost:8080/greeting?name=World"
+    }
+  }
+}
+----
+
+
+=== HATEOAS : ressource
+
+[source,java]
+----
+public class Greeting extends RepresentationModel<Greeting> {
+
+	private final String content;
+
+	@JsonCreator
+	public Greeting(@JsonProperty("content") String content) {
+		this.content = content;
+	}
+
+	public String getContent() {
+		return content;
+	}
+}
+----
+
+=== HATEOAS : controller
+
+[source,java]
+----
+@RestController
+public class GreetingController {
+
+	private static final String TEMPLATE = "Hello, %s!";
+
+	@RequestMapping("/greeting")
+	public HttpEntity<Greeting> greeting(
+		@RequestParam(value = "name", defaultValue = "World") String name) {
+
+		Greeting greeting = new Greeting(String.format(TEMPLATE, name));
+		greeting.add(linkTo(methodOn(GreetingController.class).greeting(name)).withSelfRel());
+
+		return new ResponseEntity<>(greeting, HttpStatus.OK);
+	}
+}
+----
+
+
+
+=== RETOUR RECAP
+
+CODING BY EXAMPLE :
+
+Imaginons qu’une société veuille gérer les appareils
+qu’elle confie à ses collaborateurs afin de savoir
+qui utilise quel appareil.
+
+
+Dans notre hypothèse de départ, nous pouvons imaginer les opérations suivantes :
+
+* Pour la gestion des personnes
+** Créer une personne
+** Récupérer la liste des personnes existantes
+** Récupérer les informations détaillées d’une personne
+** Mettre à jour les informations concernant une personne
+** Supprimer une personne
+
+* Pour la gestion des appareils
+** Créer un appareil
+** Récupérer la liste des appareils
+** Récupérer les informations relatives à un appareil
+** Mettre à jour les informations relatives à un appareil
+** Supprimer un appareil
+
+* Pour la gestion de « qui à quoi »
+** Lier un utilisateur à un appareil
+** Supprimer le lien entre un utilisateur et un appareil
+
+(Par soucis de facilité, nous n’allons pas gérer ici le fait de transférer l’attribution d’un appareil d’un utilisateur à un autre,
+il suffit de supprimer le lien et ensuite de le recréer avec un nouvel utilisateur)
+
+Voyons comment mettre en œuvre des APIs sur base de notre exemple de départ
+et regardons quelles sont les bonnes pratiques à respecter.
+
+=== Bonne Pratique – Utiliser correctement les verbes HTTP
+
+Bien qu’il n’y ait aucune limitation technique,
+la règle communément admise pour l’utilisations des verbes http est la suivante :
+
+[cols="1,1,4"]
+|===
+|HTTP VERB| Action |  	Description
+
+|GET    | select | Lecture d’une information
+|POST   | insert | Écrire une information
+|PUT    | update | Mettre à jour une information
+|DELETE | Delete | Supprimer une information
+|===
+
+=== Bonne Pratique – Utiliser des noms et pas de verbes dans votre URL 
+
+Prenons en exemple l’opération de récupérer tous les utilisateurs enregistrés.
+
+La bonne pratique est de retourner la liste des utilisateurs pour une requête « GET » (pour rappel, nous lisons une information) pour l’url /users
+[cols="1,1,4"]
+|===
+|VERB|URL| Description
+
+|GET |/users|	Récupération des identifiants de chaque utilisateur.
+|===
+
+A *ne pas faire* :
+[cols="1,1,4"]
+|===
+|VERB|URL|Description
+
+|GET |/getallusers  |	Récupération des identifiants de chaque utilisateur.
+|GET |/allusers     | Récupération des identifiants de chaque utilisateur.
+|===
+
+Sur base de cette première API, nous pouvons en déduire 2 nouvelles bonnes pratiques.
+
+
+=== Bonne Pratique – Utiliser le pluriel pour nommer vos ressources
+
+Lorsque l’URL se rapporte à un groupe de ressources 
+(ici nous parlons bien de plusieurs utilisateurs et non pas d’un seul), 
+le pluriel s’impose pour indiquer aux développeurs que l’URL se rapporte 
+à une collection de ressources.
+
+=== Bonne Pratique – Utiliser correctement les codes de retour
+
+Le protocole http nous offre une grande flexibilité dans les codes de retour 
+que notre API peut envoyer en réponse, il faut les utiliser là où ils ont un sens.
+
+[cols="1,2,6"]
+|===
+|Code de retour|Message|Description et utilisation
+
+|200 |OK 	        |Le serveur à traiter la requête avec succès.
+|201 |CREATED 	    |Une nouvelle ressource a été créée.
+|204 |No Content 	|Peut être utilisée en réponse à une requête DELETE effectuée avec succès.
+|206 |Partial Content| 	En réponse à une requête demandant une réponse trop lourde pour être envoyée en une seule fois. De la pagination va être nécessaire pour récupérer l’ensemble des informations
+|304 |Not Modified 	|Le client peut utiliser les données en cache car elles n’ont pas été modifiées depuis la date spécifiée.
+|400 |Bad Request 	|La requête est invalide et ne peut pas être traitée par le serveur.
+|401 |Unauthorized 	|La requête nécessite que le client soit identifié.
+|403 |Forbidden 	|Le serveur a compris la requête mais l’utilisateur n’est pas autorisé à accéder à cette API.
+|404 |Not Found 	|La ressource demandée n’existe pas.
+|500 |Internal Server Error |Votre code ne devrait jamais renvoyer cette erreur. Cette erreur devrait être récupérée par votre code et traitée, pour ensuite renvoyer une réponse adéquate au client.
+|===
+
+Prenons l’exemple de la création d’un utilisateur, la requête devrait être 
+un POST sur l’URL /users
+
+|===
+|VERB| 	URL| 	Code de retour| 	Description
+
+|POST|/users| 	201 Created |	Création d’un utilisateur
+|===
+
+=== Bonne Pratique – Utiliser des sous-ressources pour identifier un élément unique
+
+Si vous souhaitez récupérer les informations relatives à un utilisateurs précis, 
+votre requête devrait utiliser le verbe « GET » et l’URL devrait avoir la forme 
+/users/{userId} où {userId} est l’ID de l’utilisateur spécifique.
+
+|===
+|VERB|URL|Code de retour|Description
+|GET|/users/{userId} |200 OK |	Récupération des informations spécifiques de l’utilisateur
+|===
+
+=== Bonne Pratique – Utiliser des sous-ressources pour identifier une relation
+
+Si vous souhaiter récupérer le liste des appareils liés à un utilisateur spécifique, 
+votre requête utilisera le verbe « GET » et l’URL devrait avoir la forme /users/{user-ID}/devices.
+
+|===
+|VERB|URL|Code de retour|Description
+|GET|/users/{userId}/devices|200 OK | Récupération des appareils liés à un utilisateur
+|===
+
+De la même façon, si vous voulez lier un appareil à un utilisateur, la requête utilisera le verbe 
+« POST » et l’URL aura la forme /users/{user-ID}/devices/{device-ID}. 
+Dans ce cas, {user-ID} et {device-ID} sont respectivement l’ID de l’utilisateur 
+qui reçoit l’appareil et l’ID de l’appareil qu’il reçoit.
+
+|===
+|VERB|URL|Code de retour|Description
+|POST|/users/{userId}/devices/{deviceId}|201 Created|Création du lien entre l’utilisateur et le l’appareil.
+|===
+
+=== Bonne Pratique – Spécifiez le format de vos données
+
+Il est important que le développeur (et l’application qu’il développe) qui consomme vos API 
+connaisse le format de votre réponse. 
+Le header Content-Type existe justement pour répondre à ce besoin. 
+Utilisez-le toujours dans les réponses de vos APIs.
+
+N’utilisez le Content-Type « text/plain » que si la réponse est effectivement du texte.
+
+Le content type le plus utilisé, pour ne pas dire le content type standard des API REST 
+est le JSON « application/json ».
+
+Il est également très important de spécifier le « charset » que vous utilisez. 
+Dans la majorité des cas, et sauf contre-indication, le charset que vous utilisez est le « UTF-8 ».
+
+Le Header que vous envoyez en réponse aux requêtes clients devrait normalement être :
+
+`Content-Type:  application/json;charset=utf-8`
+
+=== Bonne Pratique – La gestion des temps (date et heure) :
+
+Le sujet peut sembler trivial mais il est loin de l’être.
+
+En reprenant le sujet de la gestion de nos appareils et de nos utilisateurs, 
+imaginons que nous souhaitions savoir depuis quand un utilisateur a à sa disposition 
+un appareil spécifique.
+
+L’appel que nous allons faire ressemblera à :
+|===
+|VERB|URL|Code de retour|Description
+|GET|/users/{userId}/devices/{deviceId}|200 OK|Récupération des informations relatives à l’attribution d’un appareil spécifique pris en charge par un utilisateur spécifique.
+|===
+
+La complexité vient du fait que l’attribution de l’appareil a peut-être été enregistrée 
+par une personne dans une time zone X pour un utilisateur dans une time zone Y 
+et doit être visualisée par un utilisateur dans une time zone Z. 
+Comment faire en sorte que tout le monde voit le temps qui corresponde à sa time zone ? 
+Une des solutions à ce problème est de fournir la date et l’heure sous format Timestamp UTC 
+(Petit rappel : le timestamp est le nombre de secondes écoulées depuis le 1er janvier 1970 / L’heure UTC (Universal Time Coordinated), en français Temps Universel Coordonné, est l’heure de référence internationale. 
+Elle correspond aussi à l’heure GMT (Greenwich Mean Time) et à l’heure Z (Zulu)).
+
+La réponse à ce call pourrait ressembler à :
+[source,json]
+----
+{
+ "attribution": "enable",
+ "timeFrom" : 1557080067
+}
+----
+
+=== Bonne Pratique – Utiliser HATEOAS (Hypermedia as the Engine of Application State)
+
+Derrière cet acronyme se cache simplement le fait d’utiliser des liens hypertext dans les réponses
+de vos APIs pour indiquer au client de vos APIs où il peut aller chercher plus d’informations 
+concernant une ressource.
+
+L’exemple ci-dessous est un exemple de réponse à la requête qui permet de retrouver 
+quels appareils sont liés à quel utilisateur. 
+Dans la réponse ci-dessous on peut voir que l’appareil avec l’ID 123456 
+est lié à l’utilisateur avec l’ID « abcde ». 
+La réponse ajoute que des informations relatives à l’appareil (« rel » : « self ») 
+peuvent être trouvées à l’URL spécifiée dans le lien HREF.
+
+[source,json]
+----
+{
+  "user-id": "abcde",
+  "devices": [
+     {
+        "device-ID": 123456,
+        " links":[
+          {"rel": "self ", "href": "/devices/123456"},
+          {"rel": "list",  "href": "/devices"}
+        ]
+     }
+  ]
+}
+----
+
+=== Bonne Pratique – Proposer des filtres, du tri, de la pagination pour les collections
+
+L’utilisabilité de votre API pourra être augmentée par l’ajout de fonctionnalités
+telles que les filtres, le tri ou la pagination.
+Si l’on compare les filtres, tri ou pagination au langage SQL,
+les filtres correspondent à la clause « where », le tri correspond à la clause « sort by »
+et la pagination correspond aux clauses « limit offset ».
+
+En reprenant notre exemple, si vous souhaitez ne récupérer que
+la liste des utilisateurs masculins, la requête aura la forme suivante :
+|===
+|VERB| 	URL
+|GET |	/users?sex=m
+|===
+
+Pour ajouter de la pagination, si vous ne souhaitez récupérer que les 10 premiers utilisateurs,
+la requête aura alors la forme suivante :
+|===
+|VERB |	URL
+|GET  |	/users?sex=m&limit=10
+|===
+
+« limit » donne le nombre d’objets retournés à partir du début de la liste.
+
+Pour récupérer les 10 utilisateurs suivants, la requête aura alors la forme suivante :
+|===
+|VERB| 	URL
+|GET |	/users?sex=m&offset=10&limit=10
+|===
+
+“offset” donne le point de départ du curseur à partir duquel on va prendre en compte les objets.
+
+Et enfin, si vous souhaitez trier la réponse, la requête aura alors la forme suivante :
+|===
+|VERB |	URL
+|GET  |	/users?sex=m&offset=10&limit=10&sort=+lastName,-birthDate
+|===
+
+Dans ce cas-ci, le filtre se fera sur le nom de famille
+(en ordre alphabétique grâce au « + » indiqué devant « lastName »
+et ensuite le filtre se fera sur la date de naissance
+(en ordre décroissant grâce au « – » indiqué devant le « birthDate ».
+
+=== Bonne Pratique – Documentez votre API
+
+Si vous souhaitez que votre API soit facilement utilisable
+et que les développeurs qui auront à la consommer ne vous fagocitent pas votre temps
+pour comprendre comment l’utiliser, il est INDISPENSABLE de fournir
+une documentation claire et précise.
+
+Vous aurez donc à documenter :
+
+* les différents chemins à utiliser et leur construction
+* Pour chaque chemin, les différentes méthodes (VERB) disponibles
+* Pour chaque méthode :
+** Les paramètres acceptés et leur type
+** le format accepté
+** le modèle du body s’il est utilisé
+** Les headers acceptés
+** La/les méthodes d’authentification
+
+Au-delà des descriptions techniques, vous devriez également indiquer aux développeurs
+votre politique d’utilisation de votre API.
+Avez-vous un quota d’utilisation (de call) à respecter/à ne pas dépasser,
+une « Fair Use Policy »,… ?
+
+=== Bonne Pratique – Versionnez votre API
+
+Comme toute solution informatique, votre API devrait connaître des évolutions,
+et donc des versions. Il est important d’indiquer aux développeurs qui consomment votre API
+la façon dont ils peuvent spécifier la version de l’API qu’ils appellent.
+
+Une méthode largement utilisée est d’indiquer le numéro de version dans le PATH de l’URL.
+Cette méthode a l’avantage d’être simple à mettre en œuvre de votre côté
+mais l’est peut-être un peu moins pour vos clients (les développeurs qui consomme votre API).
+En effet, s’il souhaite faire certains appels sur une version N,
+et d’autres appels sur une version N+1, ils vont devoir gérer deux préfixes de chemins différents.
+
+Une autre solution consiste à faire passer le numéro de version des APIs en paramètres,
+ou ce qui se fait plus largement, en Header à la requête.
+Un des avantages de cette solution est de permettre d’avoir une version courante
+qui évolue au fil du temps. En effet, si le développeur n’utilise pas de paramètre ou de header
+pour spécifier la version, cela implique qu’il utilise de facto la version courante
+que vous proposez. Cette technique, bien que séduisante, cache un piège non négligeable,
+vos versions d’API doivent être compatibles entre elles pour que le développeur
+qui ne fait pas de modification à son application et appel continuellement la version courante,
+ne soit pas mis en défaut lorsque vous ferez une update de la version courante.
+De la version N à la version N+1.
+Attention, cette solution vous donnera également plus de travail de gestion.
+
+Pour reprendre notre exemple, nous pourrions avoir les solutions suivantes
+pour récupérer une liste d’utilisateurs :
+|===
+|VERB| 	URL
+|GET| 	/v1/users
+|GET| 	/users?version=1
+|GET| 	/users
+|===
+
+Headers: "version:1"
+
+=== Bonne Pratique – Décorrelez les attributs des réponses avec les attributs de votre Data Store
+
+D’un point de vue sécurité, il est bon de ne pas exposer directement
+le nom des champs de vos bases de données (ou des attributs si l’on parle NoSQL)
+directement dans les réponses de votre API.
+En effet, si vous exposez en direct le nom des champs ou des attributs dans vos réponses,
+vous facilitez le travail des pirates qui auraient envie de vous attaquer.
+Il est donc important d’avoir une table de mapping entre les informations
+que vous récupérez depuis votre Data Store (SQL, NoSQL,…)
+et les informations que votre API envoie en réponse.
+
+Pour revenir à notre exemple, si l’API qui reçoit les coordonnées d’une personne
+doit envoyer son nom, son prénom, sa date de naissance,
+on peut imaginer que le retour de ce call-là aura en Body un JSON
+qui devrait avoir ressembler à ce que l’on trouve ci-dessous :
+
+[source,json]
+----
+{
+    "user" :{
+        "firstName" : "Fred",
+        "lastName" : "MOAL",
+        "birthDate" : 123984000
+    }
+}
+----
+
+=== Bonne Pratique – Pensez aux applications qui vont consommer vos APIs
+
+En construisant les différents chemins de vos APIs, pensez aux développeurs qui vont devoir
+les consommer et aux performances de votre Backend si trop de requêtes http sont nécessaires
+pour remonter une seule donnée.
+
+En reprenant notre exemple initial, une requête en GET sur le chemin /users
+devrait retourner uniquement une liste de userID, qui permettrait ensuite de retrouver
+les informations des utilisateurs en faisant une requête GET sur le chemin /users/{userId}.
+Même si cette solution peut sembler pertinente, si une application veut uniquement afficher
+le prénom de chaque utilisateur, cela implique que cette application fasse un premier call
+pour retrouver la liste des userId et ensuite un call pour chaque utilisateur
+afin de retrouver son prénom, vous multipliez donc énormément le nombre de requêtes nécessaires.
+
+Il peut donc parfois être nécessaire de se montrer flexible sur les réponses que votre API reçoit
+afin de préserver autant les performances et les coûts de votre plateforme
+que les performances des applications qui consomment vos APIs.
+
+
+
+=== Bonnes pratiques
+
+* Passage de paramètres
+** @PathVariable, @RequestParam, @RequestBody, @RequestHeader
+** Types des paramètres
+
+* Validation des paramètres
+** À la main
+** Contraintes de validation @Valid
+** Exceptions du modèle

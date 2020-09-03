@@ -1,0 +1,234 @@
+= Spring Boot
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+Spring sans les mains !
+
+== Principes
+
+principe de base : *COC*
+
+* Utilisation d'un pom parent [gestion des versions]
+* Auto-configuration de Spring
+** à partir du classpath [dépendances du pom]
+** auto-scan des annotations
+* Création d'un JAR
+
+
+=== Démarrage
+
+Création d'un projet :
+
+* Page web http://start.spring.io
+* Depuis une commande curl
+* en utilisant Spring Boot command-line interface
+* new project "Spring Initializr" avec STS, IntelliJ IDEA ou NetBeans
+
+
+=== Exemple avec IntelliJ
+
+[.thumb]
+image::projet-spring-boot0.png[scaledwidth=75%]
+ifdef::backend-revealjs[=== !]
+image::projet-spring-boot1.png[scaledwidth=75%]
+ifdef::backend-revealjs[=== !]
+image::projet-spring-boot2.png[scaledwidth=75%]
+
+=== Résultat
+
+Initializr génère un squelette de projet avec les choix effectués
+
+* langage (java/kotlin/groovy)
+* build maven/gradle
+* composants sélectionnés (et répertoires de contexte, eg web)
+* un main (Java) et un main de Test
+* un plugin `spring-boot-maven-plugin`
+
+=== Packaging
+
+Le packaging par défault de Spring Boot est un (fat)`jar`,
+même quand on fait une application web !
+
+On peut demander un `war` a deploy, mais c'est déconseillé.
+
+
+=== Lancement
+
+Run du projet
+
+* directement du main depuis l'IDE
+* en utilisant le plugin :
+** spring-boot:run
+** spring-boot:start
+* `mvn package && java -jar target/{project_id}-{version}.jar`
+
+Logs de démarrage dans la console
+
+
+== Composants
+
+=== Fonctionnalités
+
+De base, fournit l'autoconfiguration et les starters pour les dépendances
+=> simplifie le pom et la configuration
+
+Ajoute des fonctionnalités par composants (starters) eg
+
+* Actuator : info de runtime (métriques, status, env...)
+* DevTools : push des modifs dans le navigateur [plugin Live Reload à installer]
+* Properties faciles à définir
+* Support étendu natif pour les tests
+
+=== Composants thématiques
+
+En plus de Spring Core, Web, ...
+
+* Spring Data : interfaces de DAO
+* Spring Security
+* Spring integration & Spring Batch
+* Spring Cloud [micro-services]
+* Reactive Spring
+
+=> starters
+
+
+=== Configuration par défaut :
+
+[source,java]
+----
+@SpringBootApplication
+public class DemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+----
+
+Auto-scan le code (annotations, @Configuration...)
+par défaut dans les *sous-packages* de la classe principale
+
+=== Annotation `@SpringBootApplication`
+
+Ajoute automatiquement :
+
+- `@Configuration` tags la classe comme la source des définitions de bean pour le contexte.
+- `@EnableAutoConfiguration` dis à Spring Boot d'ajouter des beans et des settings en fonction du classpath.
+- `@ComponentScan` active le scan des components, configurations, et des services dans le package.
+
+=== application.properties
+
+Fichier de configuration à la racine de resources
+(pour configuration BD, ...)
+
+clés de properties prédéfinies utilisables
+
+On peut utiliser un yaml à la place
+
+=== Exemple Data Jpa
+
+[source]
+----
+spring.jpa.hibernate.ddl-auto=create
+spring.datasource.url=jdbc:mysql://localhost:3306/banque
+spring.datasource.username=springuser
+spring.datasource.password=ThePassword
+----
+
+=== Remplacement de composants par défaut
+
+Exemple avec Hibernate => EclipseLink
+[source,xml]
+----
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-jpa</artifactId>
+  <exclusions>
+    <exclusion>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <groupId>org.hibernate</groupId>
+    </exclusion>
+  </exclusions>
+</dependency>
+
+<dependency>
+  <groupId>org.eclipse.persistence</groupId>
+  <artifactId>eclipselink</artifactId>
+  <version>2.5.2</version>
+</dependency>
+----
+
+
+== Exemple Spring Data
+
+Projet Spring réunissant de nombreux sous-projets, suivant la base de données
+
+* Spring Data JPA
+** JPA persistence against a relational database
+* Spring Data MongoDB
+* Spring Data Neo4j
+* Spring Data Redis
+* Spring Data Cassandra
+
+
+=== Configuration dans un projet
+
+Utilise SpringBoot, ajout d'une dépendance starter, eg JPA :
+[source, xml]
+----
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+----
+
+=== Ajout driver JDBC
+
+Autoscan fournit le driver de la datasource
+
+[source,xml]
+----
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+</dependency>
+----
+
+
+=== Dao en interface
+
+Opération CRUD générée + méthodes par nommage !
+[source,java]
+----
+public interface ClientRepository extends CrudRepository<Client,Long> {
+    List<Client> findByNom(String nom);
+}
+----
+
+=== Exemple d'utilisation
+
+[source,java]
+----
+@Bean
+public CommandLineRunner demo(ClientRepository repository) {
+  return (args) -> {
+      repository.save(new Client("Jack", "Bauer"));
+      repository.save(new Client("Chloe", "O'Brian"));
+      repository.save(new Client("Kim", "Bauer"));
+
+      for (Client Client : repository.findAll()) {
+            log.info(Client.toString());
+      }
+      repository.findByNom("Bauer").forEach(bauer -> {
+            log.info(bauer.toString());
+      });
+};
+----
+
+
+== Conclusion
+
+Spring Boot indispensable sur tout nouveau projet Spring !
+
+cf https://sping.io/guides

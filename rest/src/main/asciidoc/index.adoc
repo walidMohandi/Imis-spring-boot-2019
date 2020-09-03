@@ -1,0 +1,32 @@
+= cours Webservices
+include::_header.adoc[]
+:doctype: book
+:toc: left
+:toc-title: Sommaire
+:sectanchors:
+:sectlinks:
+:sectnums:
+:masterdoc: // chapters are embedded in a master document
+
+
+// chapters
+
+:leveloffset: +1
+
+include::ch0-intro.adoc[]
+
+include::ch1-rest.adoc[]
+
+include::ch2-client.adoc[]
+
+include::ch3-springboot.adoc[]
+
+include::ch4-serveur.adoc[]
+
+include::ch5-api-design.adoc[]
+
+include::ch6-serialisation.adoc[]
+
+include::ch7-securite.adoc[]
+
+:leveloffset: -1

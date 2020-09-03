@@ -1,0 +1,674 @@
+= Webservices : REST
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+
+
+== Références
+
+* Back Java
+** baeldung.com
+** spring.io
+** dzone.com
+** json.org
+** jwt.io
+* Veille
+** Les cast codeurs
+** Twitter
+** Blogs OCTO/Ippon/Xebia/...
+
+* pour JS : Michel Buffa, MIAGE de Nice
+
+
+== Sommaire
+
+* REST : introduction
+* Piqure de « rappel » HTTP
+* RESTful et HTTP
+* Programmation REST en Java
+* API design
+
+
+== Communications inter-applications
+
+Plusieurs niveaux de communication :
+
+* API : on embarque directement l’application à
+appeler (dépendance directe, eg JAR dans pom)
+* RPC/RMI/Corba : on embarque les interfaces des
+services
+* EJB : on appelle l’application avec un protocole
+de niveau transport (TCP/IP, RMI) ou directe (si
+même JVM)
+* REST : échanges niveau HTTP, on exploite à
+100% le protocole
+* SOAP : au dessus d’HTTP ou SMTP ou ..., on
+encapsule les messages
+
+
+== REST
+
+* Principe simple -> Exploitation de la mécanique HTTP
+* Inspiration pour définir l’« architecture » d’accès (interface) à une application
+
+=== Web Service REST
+
+* Acronyme de REpresentational State Transfert défini
+dans la thèse de Roy Fielding en 2000 :
+http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm
+
+* REST n’est pas un protocole ou un format,
+contrairement à SOAP, HTTP ou RCP, mais un style
+d’architecture fortement basé sur le protocole HTTP
+
+=== un Web Service REST...
+
+- Ce qu’il est :
+* Un système d’architecture
+* Une approche pour construire une application
+- Ce qu’il n’est pas
+* Un protocole
+* Un format
+* Un standard
+
+=== REST - utilisation
+
+Utilisé dans le développement des applications orientés ressources (ROA)
+ou orientées données (DOA)
+
+Les applications respectant l’architecture REST sont dites RESTful
+
+Attention, REST et RESTful sont devenus des termes marketing !
+Certains services Web se réclamant de REST ne le sont pas (eg
+utilisent le protocole HTTP de manière un peu plus conventionnelle)
+
+=> Utilisation du terme HATEOAS, [Hypermedia as the Engine
+of Application State]
+
+
+
+== Protocole HTTP
+
+Piqure de rappel sur le protocole
+
+=== Le Protocole HTTP
+
+HyperText Transfer Protocol
+
+Protocole d’échanges d’information sur le "web"
+
+Basé sur TCP => connecté
+
+Version courante 1.1 [2.0]
+
+
+=== URL/URI
+
+Unique Resource Location
+
+Identifie les ressources de manière unique
+
+composée de 5 parties :
+
+. Protocole (http, ftp, smtp, ...)
+. Host (google.com)
+. Port (8080, 80)
+. Path (Chemin vers la ressource sur le serveur)
+. Paramètres
+
+.Décomposition d'une URL
+|===
+|https://|server:port|/path/to/resource|?p1=v1&p2=v2
+
+|Protocole|Nom/ip du serveur et port|Chemin de la ressource|Paramètres
+|===
+
+
+=== request HTTP
+
+Permet à un client d’envoyer des messages à un serveur
+
+Format d’un message HTTP :
+
+* Request Message Header
+** Request Line
+** Request Headers [Optional]
+* Request Message Body
+
+
+ifdef::backend-revealjs[=== request HTTP]
+
+Requête envoyée par un client http vers
+un serveur
+
+.Format d'une requête
+----
+<Méthode> <URI> HTTP/<version>
+[<Champ d’en-tête> : <valeur>]
+Accept: <Types MIME du contenu>
+Ligne blanche
+[Corps de la requête]
+----
+
+ifdef::backend-revealjs[=== request HTTP]
+
+<Méthode> de la requête : GET, POST, PUT, DELETE, PATCH, ...
+
+<URI> de la ressource (avec paramètres éventuels)
+
+<version> du protocole utilisée : 1.0, 1.1 ou 2.0
+
+<Champ d'entête> : <valeur> : informations sur le contexte de la requête (cookies,
+localisation, ....)
+
+Exemple d'entête, "Accept: application/json,application/xml",
+par ordre de préférence sur le type de contenu souhaité dans la réponse.
+
+<Corps de la requête> : données envoyées au serveur, prise en
+compte pour les requêtes de type POST ou PUT ou PATCH
+
+
+=== response HTTP
+
+Réponse du serveur à une requête d'un client :
+
+* Response Message Header
+** Response Line
+** Response Headers
+* Response Message [Optional]
+
+
+ifdef::backend-revealjs[=== response HTTP]
+
+Réponse du serveur à la requête HTTP
+
+.Format d'une réponse
+----
+HTTP / <Version> <Statut> <Commentaire>
+[<Champ d’en tête>: <valeur>]
+Content-Type: <Type MIME du contenu>
+Ligne blanche
+<Contenu>
+----
+
+ifdef::backend-revealjs[=== response HTTP]
+
+<Version> du protocole utilisée : 1.0 ou 1.1 ou 2.0
+
+<Statut> de la réponse, caractérisé par des
+codes prédéfinis par le protocole http :
+200/404/500...
+
+<Commentaire> Information descriptive sur
+le statut de la réponse, eg "OK"
+
+<Champ d'entête> : <valeur> : informations sur le contexte de la réponse (cookies,
+localisation, serveur ...)
+
+Exemple d'entête, "Content-Type: application/xml;charset=UTF-8",
+qui défini le type MIME du contenu de la réponse.
+
+
+=== Exemple de Request
+
+* Request Line
+
+`POST /bibliotheque/faces/views/categorie/Create.xhtml HTTP/1.1`
+
+* Request Headers
+----
+Host: localhost:8080
+Connection: keep-alive
+Content-Length: 176
+Cache-Control: max-age=0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/
+*;q=0.8
+Origin: http://localhost:8080
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0)
+AppleWebKit/537.36 (KHTML, like Gecko) Chrome/
+39.0.2171.65 Safari/537.36
+Content-Type: application/x-www-form-urlencoded
+Referer:
+http://localhost:8080/bibliotheque/faces/views/categorie/List.xhtml
+Accept-Encoding: gzip, deflate
+Accept-Language: fr,fr-FR;q=0.8,en;q=0.6
+Cookie: JSESSIONID=d64a9484e61761662575b5d14af1
+----
+
+* Request Message Body
+----
+j_idt13:nom:Toto
+j_idt13:description:Hello
+----
+
+=== Exemple de Response
+
+* Response Line
+`HTTP/1.1 200 OK`
+
+* Response Headers
+----
+X-Powered-By: Servlet/3.1 JSP/2.3 (GlassFish
+Server Open Source Edition 4.0 Java/Oracle
+Corporation/1.8)
+Server: GlassFish Server Open Source Edition
+4.0
+Content-Type: text/html;charset=UTF-8
+Date: Sun, 23 Nov 2014 16:05:39 GMT
+Content-Length: 2274
+----
+
+* Response Message Body
+
+** Response Body
+----
+<html xmlns="http://www.w3.org/1999/xhtml"><html xmlns="http://www.w3.org/1999/xhtml">
+<head><link type="text/css" rel="stylesheet" href="/bibliotheque/faces/javax.faces.resource/theme.css?
+ln=primefaces-aristo" />
+<link type="text/css" rel="stylesheet" href="/bibliotheque/faces/javax.faces.resource/css/jsfcrud.css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Create New Categorie</title></head><body>
+<h1>Create New Categorie</h1>
+<p><div id="messagePanel">
+<table>
+<tr style="color: green"><td>Categorie was successfully created. </td>
+</tr>
+</table></div>
+</html>
+----
+
+
+=== Retours d’information : Status code
+
+Status code *obligatoire*
+
+* 100-level (Informational) — Server acknowledges a request
+
+* 200-level (Success) — Server completed the
+request as expected
+
+* 300-level (Redirection) — Client needs to
+perform further actions to complete the request
+
+* 400-level (Client error) — Client sent an
+invalid request
+
+* 500-level (Server error) — Server failed to
+fulfill a valid request due to an error with server
+
+Doivent être interprétés correctement par le
+client, et émis correctement par le serveur !!!
+
+
+=== Status code
+
+Une fiche mémo :
+
+http://authoritylabs.com/blog/common-http-response-codes-and-what-they-mean/
+
+
+=== De nombreuses autres méthodes…
+
+HTTP définit un ensemble de méthodes
+qui permet de caractériser les types de
+requêtes
+
+* GET : Récupérer des ressources à un serveur
+* POST : Envoyer des données à un serveur
+* PUT/PATCH : Modifier des données
+* DELETE : Suppression de données
+* OPTIONS : Demander la liste des méthodes
+supportées par un serveur
+* Autres : HEAD, TRACE, CONNECT
+
+
+
+
+
+== Et REST ?
+
+Les caractéristiques d'un service REST héritent
+en partie du protocoloe http sur lequel il s'appuie
+
+
+=== Les services REST sont sans états (Stateless)
+
+Chaque requête envoyée au serveur doit
+contenir _toutes les informations_ relatives à son
+état et est traitée indépendamment de toutes
+autres requêtes
+
+* Minimisation des ressources systèmes (pas de
+gestion de session, ni d’état)
+* Interface uniforme basée sur les méthodes
+HTTP (GET, POST, PUT/PATCH, DELETE en général)
+
+Les architectures RESTful sont construites à
+partir de ressources uniquement identifiées
+par des URI(s)
+
+=== Requêtes REST : 3 caractéristiques
+
+* Ressources : Identifiée par une URI
+** http://univ-orleans.fr/cursus/master/miage/sir/2
+
+* Méthodes (verbes) permettant de
+manipuler les ressources (identifiants)
+** Méthodes limitées strictement à HTTP :
+GET, POST, PUT/PATCH, DELETE
+
+* Représentation : Vue sur l’état de la ressource
+** Format d’échanges entre le client et le serveur (XML, JSON, text/plain,…)
+
+=== Ressources
+
+* Une ressource est un objet identifiable sur le système
+** Livre, Catégorie, Client, Prêt
+** Une ressources n’est pas forcément un objet
+matérialisé (Prêt, Consultation, Facture…)
+
+* Une ressource est identifiée par une URI :
+Une URI identifie uniquement une ressource
+sur le système (une ressource “peut” avoir
+plusieurs identifiants)
+** http://amazon.fr/bookstore/books/2934
+[2934 Clef primaire de la ressource]
+
+=== Méthodes (Verbes)
+
+Une ressource peut subir quatre
+opérations de bases CRUD
+correspondant aux quatre principaux
+types de requêtes HTTP (GET, PUT,
+POST, DELETE)
+
+=== CRUD
+
+image::crud.jpg[Opérations CRUD en REST]
+
+=== Méthode GET
+
+La méthode GET renvoie une
+représentation de la ressource tel qu’elle est sur le système
+
+.request
+----
+GET http://amazon.fr/bookstore/books/156
+----
+
+.response
+----
+Statut : 200
+Message : OK
+En-tête : ….
+Représentation : XML, JSON, html,…
+----
+
+=== Méthode POST
+
+La méthode POST crée une nouvelle
+ressource sur le système
+
+.request
+----
+POST http://amazon.fr/bookstore/books
+Corps de la requête
+Représentation : XML, JSON
+----
+
+.response
+----
+Statut : 201, 204
+Message : Create, No content
+En-tête : URI de la ressource créée
+----
+
+=== Méthode DELETE
+
+Supprime la ressource identifiée par
+l’URI sur le serveur
+
+.request
+----
+DELETE http://amazon.fr/bookstore/books/156
+[Identifiant de la ressource sur le serveur]
+----
+
+.response
+----
+Statut : 200 ou 204
+Message : OK, No content
+En-tête : ...
+----
+
+=== Méthode PUT
+
+Mise à jour de la ressource sur le
+système
+
+Identifiant de la
+ressource sur le
+serveur
+
+.request
+----
+PUT http://amazon.fr/bookstore/books/156
+En-tête : …..
+Corps de la requête : XML, JSON,…
+----
+
+.response
+----
+Statut : 200
+Message : OK
+En-tête : …..
+----
+
+
+=== Représentation
+
+Une représentation désigne les données échangées entre
+le client et le serveur pour une ressource:
+* HTTP GET : Le serveur renvoie au client l’état de la
+ressource
+* PUT/PATCH, POST : Le client envoie l’état d’une
+ressource au serveur
+
+Les données peuvent être sous différents formats [MIME]:
+JSON, XML, XHTML, CSV, Text/plain, ...
+
+
+== les Formats d’échange de données
+
+JSON et ses amis
+
+Deux formats "Standards" de fait :
+
+* XML
+* JSON
+
+=== JSON
+
+JSON « JavaScript Object Notation » est un
+format d’échange de données, facile à lire
+par un humain et interpréter par une
+machine.
+
+Deux structures :
+* Une collection de clefs/valeurs : Object
+* Une collection ordonnée d’objets : Array
+
+=== JSON : Objet
+
+Commence par un « { » et se termine par « } » et composé d’une liste non ordonnée
+de paire clefs/valeurs. Une clef est suivie de « : » et les paires clef/valeur sont
+séparés par « , »
+[source,json]
+----
+{
+    "id": 51,
+    "nom": "Mathematiques 1",
+    "resume": "Resume of math ",
+    "isbn": "123654",
+    "categorie": {
+        "id": 2, "nom": "Mathematiques",
+        "description": "Description of mathematiques "
+    },
+    "quantite": 42,
+    "photo": null
+}
+----
+
+=== JSON : ARRAY
+
+Liste ordonnée d’objets commençant par « [« et se terminant par « ] », les objets
+sont séparés l’un de l’autre par « , »
+[source,json]
+----
+[
+    { "id": 51,
+    "nom": "Mathematiques 1",
+    "resume": "Resume of math ",
+    "isbn": "123654",
+    "quantite": 42
+    },
+    { "id": 102,
+    "nom": "Mathematiques 4",
+    "resume": "Resume of math ",
+    "isbn": "12365444455",
+    "quantite": 18
+    }
+]
+----
+
+=== JSON : Value
+
+Un objet peut être soit un string entre "" ou un nombre (entier, décimal) ou
+un boolean (true, false) ou null ou un objet.
+
+=== XML vs JSON
+
+* XML est standard
+* Manipulation aisée
+* Verbeux
+* Schéma XSD,DTD, XSLT, ...
+
+* JSON est crée pour les
+navigateurs web (JS !)
+* Interprété nativement
+* Supporté par tous les
+langages moyennant
+une API spécifique (Jackson, JAXB, …)
+
+Pour les deux, cf RefCardz sur dzone.com
+
+== URIs/datas par l’exemple
+
+=== Un exemple
+
+* Sondages des questions et plusieurs
+réponses
+* Toutes les opérations CRUD sur un
+sondage
+* Sur chaque sondage des votes, avec une
+réponse
+* Toutes les opérations CRUD sur un vote
+
+=== Exemple : Création d’un sondage
+
+----
+POST /sondage
+<question>Lequel ?</question>
+<options>A,B,C</options>
+
+201 Created
+Location: /sondage/672609683
+----
+
+----
+GET /sondage/672609683
+
+200 OK
+<question>Lequel ?</question>
+<options>A,B,C</options>
+----
+
+=== Exemple : Vote au sondage
+
+----
+POST /sondage/672609683/vote
+<name>J. Martins</name>
+<choice>B</choice>
+
+201 Created
+Location: /sondage/672609683/vote/1
+----
+
+----
+GET /sondage/672609683
+
+200 OK
+<question>Lequel ?</question>
+<options>A,B,C</options>
+<votes>
+<vote id=‘1’>
+<name>J. Martins</name>
+<choice>B</choice>
+</vote>
+----
+
+=== Exemple : Modification d’un sondage
+
+----
+PUT /sondage/672609683/vote/1
+<name>J. Martins</name>
+<choice>C</choice>
+
+200 OK
+----
+
+----
+GET /sondage/672609683
+
+200 OK
+<options>A,B,C</options>
+<votes>
+<vote id=‘1’>
+<name>J. Martins</name>
+<choice>C</choice>
+</vote>
+</votes>
+----
+
+=== Exemple : Suppression d’un sondage
+
+----
+DELETE /sondage/672609683
+
+200 OK
+----
+
+----
+GET /sondage/672609683
+
+404 Not Found
+----
+
+
+=== Asynchronisme
+
+HTTP est un protocole synchrone
+
+On peut simuler l'asynchrone en utilisant des files d'attente :
+----
+POST /queue
+
+202 Accepted
+Location: /queue/message/1
+----
+
+Et ensuite lecture des résultats sur :
+----
+GET /queue/message/1
+----

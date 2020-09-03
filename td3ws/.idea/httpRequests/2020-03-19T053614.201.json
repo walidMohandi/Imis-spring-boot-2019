@@ -1,0 +1,22 @@
+{
+  "nomSondage": "monsondage",
+  "proprietaire": {
+    "id": 1,
+    "nom": "Poirot",
+    "prenom": "Hercule",
+    "pseudo": "Hercule"
+  },
+  "films": [
+    {
+      "id": 1,
+      "titre": "The blues brothers",
+      "realisateur": "John Landis",
+      "resume": "Jack et Elwood voient la lumière et sauvent l'orphelinat",
+      "acteurs": [
+        "John Belushi",
+        "Dan Aykroyd"
+      ],
+      "sortie": "1980"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+@import "reveal-fred-light.css";
+
+body {
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              center url('../backgrounds/reveal-parallax-1.jpg');
+  background-size: 3%, cover, cover;
+}

@@ -1,0 +1,23 @@
+= cours Webservices
+
+Documents du cours webservices, master 1
+
+
+== Slides et exemples du cours
+
+Les documents du cours sont en asciidoc dans _src/main/asciidoc_
+et les codes sources des démos dans _src/main/java_ et _src/main/resources_.
+
+== Usage
+
+Pour générer les slides et le pdf du cours, Maven, what else ?
+
+ $ mvn
+
+(lance le but par défaut : `process-resources`)
+
+Pour voir les slides des chapitres du cours, ouvrir _target/generated-slides/chX.html_
+
+Pour le pdf du cours, ouvrir _target/generated-docs/index.pdf_
+
+Pour les codes des exemples, ils sont dans _src/main/java_, tout simplement !

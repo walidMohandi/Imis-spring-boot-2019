@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="159px" preserveAspectRatio="none" style="width:582px;height:159px;" version="1.1" viewBox="0 0 582 159" width="582px" zoomAndPan="magnify"><defs><filter height="300%" id="fklwejadh0e1r" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><path d="M33,37.509 L33.2802,37.509 L32.4476,47.4744 L33.2577,57.4397 L33.5329,67.4051 L32.0488,77.3705 L32.8964,87.3358 L32.4313,97.3012 L32.4887,107.2665 L32.9091,117.2319 L32.0782,127.1973 L33.7382,137.1626 L33,147.128 " fill="none" style="stroke: #000000; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;"/><path d="M287,37.509 L287.2802,37.509 L286.4476,47.4744 L287.2577,57.4397 L287.5329,67.4051 L286.0488,77.3705 L286.8964,87.3358 L286.4313,97.3012 L286.4887,107.2665 L286.9091,117.2319 L286.0782,127.1973 L287.7382,137.1626 L287,147.128 " fill="none" style="stroke: #000000; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;"/><path d="M540.5,37.509 L540.7802,37.509 L539.9476,47.4744 L540.7577,57.4397 L541.0329,67.4051 L539.5488,77.3705 L540.3964,87.3358 L539.9313,97.3012 L539.9887,107.2665 L540.4091,117.2319 L539.5782,127.1973 L541.2382,137.1626 L540.5,147.128 " fill="none" style="stroke: #000000; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;"/><polygon fill="#BAE4B3" filter="url(#fklwejadh0e1r)" points="8,3,8,3.2102,17.2,2.5857,26.4,3.1933,35.6,3.3997,44.8,2.2866,54,3,53.9741,3,53.8578,8.9018,53.8722,14.8036,53.9773,20.7054,53.7695,26.6072,54,32.509,54,33.0626,44.8,31.8787,35.6,32.3112,26.4,32.9409,17.2,32.4232,8,32.509,8.0227,32.509,7.9894,26.6072,8.0595,20.7054,8.0797,14.8036,8.1952,8.9018,8,3" style="stroke: #BAE4B3; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica Neue" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="32" x="15" y="22.74">Sales</text><polygon fill="#BAE4B3" filter="url(#fklwejadh0e1r)" points="259,3,259,3.2102,269.4,2.5857,279.8,3.1933,290.2,3.3997,300.6,2.2866,311,3,310.9741,3,310.8578,8.9018,310.8722,14.8036,310.9773,20.7054,310.7695,26.6072,311,32.509,311,33.0626,300.6,31.8787,290.2,32.3112,279.8,32.9409,269.4,32.4232,259,32.509,259.0227,32.509,258.9894,26.6072,259.0595,20.7054,259.0797,14.8036,259.1952,8.9018,259,3" style="stroke: #BAE4B3; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica Neue" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="38" x="266" y="22.74">Broker</text><polygon fill="#BAE4B3" filter="url(#fklwejadh0e1r)" points="506.5,3,506.5,3.2102,515.7857,2.5857,525.0714,3.1933,534.3571,3.3997,543.6429,2.2866,552.9286,2.9223,562.2143,2.5735,571.5,3,571.3722,3,571.4773,8.9018,571.2695,14.8036,571.6845,20.7054,571.2899,26.6072,571.5,32.509,571.5,32.3112,562.2143,32.9409,552.9286,32.4232,543.6429,32.5772,534.3571,32.4771,525.0714,32.6875,515.7857,32.7481,506.5,32.509,506.6952,32.509,506.7237,26.6072,506.7264,20.7054,506.5849,14.8036,506.6545,8.9018,506.5,3" style="stroke: #BAE4B3; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica Neue" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="51" x="513.5" y="22.74">Shipping</text><polygon fill="#0000FF" points="298,65.382,298.026,65.4471,295.9487,66.0538,294.0239,67.0418,292.0495,67.9057,289.9117,68.3612,288,69.382,287.9904,69.3579,289.9472,70.05,291.9525,70.8633,293.9916,71.7609,295.9144,72.368,298,73.382,298.1305,73.5125,297.0514,72.4334,296.3534,71.7354,295.7018,71.0838,294.7798,70.1618,294,69.382,294.0161,69.3981,294.7925,68.5745,295.6421,67.8241,296.4564,67.0384,297.338,66.32,298,65.382" style="stroke: #0000FF; stroke-width: 1.0;"/><path d="M292,69.382 L292,69.6622 L301.92,68.8296 L311.84,69.6397 L321.76,69.9149 L331.68,68.4308 L341.6,69.2784 L351.52,68.8133 L361.44,68.8707 L371.36,69.2911 L381.28,68.4602 L391.2,70.1202 L401.12,68.5416 L411.04,69.1183 L420.96,69.9579 L430.88,69.2676 L440.8,69.473 L450.72,69.3394 L460.64,69.62 L470.56,69.7008 L480.48,70.1629 L490.4,70.2767 L500.32,70.2877 L510.24,69.7215 L520.16,70.0001 L530.08,70.3183 L540,69.382 " fill="none" style="stroke: #0000FF; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica Neue" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="15" x="304" y="64.561">[1]</text><text fill="#000000" font-family="Helvetica Neue" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="109" x="323" y="64.431">Subscribe (Orders)</text><polygon fill="#0000FF" points="275,95.255,275.026,95.3201,276.9487,95.9268,279.0239,96.9148,281.0495,97.7787,282.9117,98.2342,285,99.255,284.9904,99.2309,282.9472,99.923,280.9525,100.7363,278.9916,101.6339,276.9144,102.241,275,103.255,275.1305,103.3855,275.6514,102.3064,276.5534,101.6084,277.5018,100.9568,278.1798,100.0348,279,99.255,279.0161,99.2711,278.1925,98.4475,277.4421,97.6971,276.6564,96.9114,275.938,96.193,275,95.255" style="stroke: #0000FF; stroke-width: 1.0;"/><path d="M33,99.255 L33,99.5352 L42.92,98.7026 L52.84,99.5127 L62.76,99.7879 L72.68,98.3038 L82.6,99.1514 L92.52,98.6863 L102.44,98.7437 L112.36,99.1641 L122.28,98.3332 L132.2,99.9932 L142.12,98.4146 L152.04,98.9913 L161.96,99.8309 L171.88,99.1406 L181.8,99.346 L191.72,99.2124 L201.64,99.493 L211.56,99.5738 L221.48,100.0359 L231.4,100.1497 L241.32,100.1607 L251.24,99.5945 L261.16,99.8731 L271.08,100.1913 L281,99.255 " fill="none" style="stroke: #0000FF; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica Neue" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="15" x="40" y="94.434">[2]</text><text fill="#000000" font-family="Helvetica Neue" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="211" x="59" y="94.304">New Order { order-id: 1234 items: []}</text><polygon fill="#0000FF" points="529,125.128,529.026,125.1931,530.9487,125.7998,533.0239,126.7878,535.0495,127.6517,536.9117,128.1072,539,129.128,538.9904,129.1039,536.9472,129.796,534.9525,130.6093,532.9916,131.5069,530.9144,132.114,529,133.128,529.1305,133.2585,529.6514,132.1794,530.5534,131.4814,531.5018,130.8298,532.1798,129.9078,533,129.128,533.0161,129.1441,532.1925,128.3205,531.4421,127.5701,530.6564,126.7844,529.938,126.066,529,125.128" style="stroke: #0000FF; stroke-width: 1.0;"/><path d="M287,129.128 L287,129.4082 L296.92,128.5756 L306.84,129.3857 L316.76,129.6609 L326.68,128.1768 L336.6,129.0244 L346.52,128.5593 L356.44,128.6167 L366.36,129.0371 L376.28,128.2062 L386.2,129.8662 L396.12,128.2876 L406.04,128.8643 L415.96,129.7039 L425.88,129.0136 L435.8,129.219 L445.72,129.0854 L455.64,129.366 L465.56,129.4468 L475.48,129.9089 L485.4,130.0227 L495.32,130.0337 L505.24,129.4675 L515.16,129.7461 L525.08,130.0643 L535,129.128 " fill="none" style="stroke: #0000FF; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica Neue" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="15" x="294" y="124.307">[3]</text><text fill="#000000" font-family="Helvetica Neue" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="211" x="313" y="124.177">New Order { order-id: 1234 items: []}</text><!--
+@startuml
+hide footbox
+
+skinparam handwritten true
+
+skinparam sequence {
+   ArrowColor blue
+   ParticipantBorderColor #BAE4B3
+   ParticipantBackgroundColor #BAE4B3
+
+  DefaultFontName "Helvetica Neue"
+  DefaultFontSize 13
+  DefaultFontStyle UltaLight
+  DefaultFontColor grey
+  ParticipantFontName "Helvetica Neue"
+  ParticipantFontStyle UltraLight
+  ParticipantFontSize 13
+
+  ArrowFontName  "Helvetica Neue"
+  ArrowFontStyle UltraLight
+  ArrowFontSize 13
+
+  SequenceArrowFontSize 13
+  SequenceMessageFontSize 13
+
+   LifeLineBorderColor black
+  SequenceMessageAlign left
+}
+
+autonumber 1 1 "<b>[0]"
+
+participant Sales
+participant Broker
+participant Shipping
+
+Shipping -> Broker: Subscribe (Orders)
+Sales -> Broker: New Order { order-id: 1234 items: []}
+Broker -> Shipping: New Order { order-id: 1234 items: []}
+
+@enduml
+
+PlantUML version 1.2018.13(Mon Nov 26 10:11:51 MST 2018)
+(APACHE source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 10.0.2+13
+Operating System: Mac OS X
+OS Version: 10.14.3
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

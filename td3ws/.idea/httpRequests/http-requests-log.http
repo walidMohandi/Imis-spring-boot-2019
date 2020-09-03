@@ -1,0 +1,279 @@
+POST http://localhost:8080/allucine/sondage/monsondage/film
+idUtil: 1
+
+1
+
+<> 2020-03-19T055716.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+<> 2020-03-19T055712.201.json
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T055710.201.json
+
+###
+
+POST http://localhost:8080/allucine/film
+Content-Type: application/json
+
+{"titre":"The blues brothers","realisateur":"John Landis", "acteurs":["John Belushi","Dan Aykroyd"], "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+<> 2020-03-19T055708.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage/monsondage/film
+idUtil: 1
+
+1
+
+<> 2020-03-19T053614.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+<> 2020-03-19T053609.201.json
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T053606.201.json
+
+###
+
+POST http://localhost:8080/allucine/film
+Content-Type: application/json
+
+{"titre":"The blues brothers","realisateur":"John Landis", "acteurs":["John Belushi","Dan Aykroyd"], "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+<> 2020-03-19T053556.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage/monsondage/film
+idUtil: 1
+
+titre=1
+
+<> 2020-03-19T052814.415.json
+
+###
+
+POST http://localhost:8080/allucine/sondage/monsondage/film
+idUtil: 1
+
+1
+
+<> 2020-03-19T052744.415.json
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+<> 2020-03-19T052659.201.json
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T052656.201.json
+
+###
+
+POST http://localhost:8080/allucine/film
+Content-Type: application/json
+
+{"titre":"The blues brothers","realisateur":"John Landis", "acteurs":["John Belushi","Dan Aykroyd"], "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+<> 2020-03-19T052654.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+<> 2020-03-19T042306.200.json
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T042257.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T034440.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+Content-Type: application/json
+
+{"titre":"monsondage"}
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T034237.201.json
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+Content-Type: application/json
+
+{"titre":"monsondage"}
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+Content-Type: application/json
+
+{"titre":"monsondage"}
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T034126.201.json
+
+###
+
+GET http://localhost:8080/allucine/film
+
+<> 2020-03-19T122050.200.json
+
+###
+
+POST http://localhost:8080/allucine/film
+Content-Type: application/json
+
+{"titre":"The blues brothers","realisateur":"John Landis", "acteurs":["John Belushi","Dan Aykroyd"], "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+<> 2020-03-19T122048.201.json
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+<> 2020-03-19T122034.201.json
+
+###
+
+GET http://localhost:8080/allucine/film
+
+<> 2020-03-19T121901.200.json
+
+###
+
+GET http://localhost:8080/allucine/film
+
+<> 2020-03-19T120639.200.json
+
+###
+
+POST http://localhost:8080/allucine/film
+Content-Type: application/json
+
+{"titre":"The blues brothers","realisateur":"John Landis", "acteurs":["John Belushi","Dan Aykroyd"], "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+<> 2020-03-19T120626.201.json
+
+###
+
+POST http://localhost:8080/allucine/film
+{"titre": "The blues brothers","realisateur":"John Landis", "acteurs":["John Belushi","Dan Aykroyd"], "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+<> 2020-03-19T120433.400.html
+
+###
+
+POST http://localhost:8080/allucine/film
+{"titre": "The blues brothers","realisateur":"John Landis", "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+<> 2020-03-19T120152.400.html
+
+###
+
+GET http://localhost:8080/allucine/film
+
+<> 2020-03-19T115857.200.json
+
+###
+

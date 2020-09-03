@@ -1,0 +1,18 @@
+Frédéric Moal <frederic.moal@univ-orleans.fr>
+:revnumber: {project-version}
+ifndef::imagesdir[:imagesdir: images]
+ifndef::sourcedir[:sourcedir: ../java]
+ifndef::testsourcedir[:testsourcedir: ../../test/java]
+ifndef::resourcesdir[:resourcesdir: ../resources]
+:navigation:
+:menu:
+:status:
+:title-slide-transition: zoom
+:title-slide-transition-speed: fast
+:icons: font
+// reveal options ; cf https://github.com/asciidoctor/asciidoctor-reveal.js/
+:source-highlighter: highlightjs
+:highlightjs-theme: lib/highkight/styles/vs.min.css
+:revealjs_center: true
+:revealjs_slideNumber: true
+:revealjs_customtheme: themes/css/reveal-fred-para1.css

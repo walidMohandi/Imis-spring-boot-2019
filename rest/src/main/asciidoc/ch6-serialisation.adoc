@@ -1,0 +1,877 @@
+= Webservices : Sérialisation
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+
+ET LES OBJETS JAVA ?
+
+JAXB XML(JSON) ET JAVA
+
+== JAXB
+
+JAXB (Java API for XML Binding) est un
+framework qui permet d'associer un modèle
+objet écrit en Java à un modèle objet écrit en
+XML
+
+* Il fait le mapping (dans les deux sens) entre
+classes Java et des schémas XSD
+** Génération de classes à partir d’un schéma XSD
+** Génération d’un schéma à partir de classes
+
+Il permet ensuite de passer automatiquement d’instances (objets) à des
+documents XML conformes à un schéma.
+
+
+=== Premier exemple
+
+Annotations dans le code Java pour générer un schéma et des documents
+XML API JAXB intégrée dans Java SE 6+
+
+[source,java]
+----
+@XmlRootElement(name="marin",
+namespace="http://orleans.univ.fr/cours-wsi")
+@XmlAccessorType(XmlAccessType.FIELD)
+@Entity
+public class Marin implements Serializable {
+    @XmlAttribute(name="id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String nom ;
+    @Enumerated(EnumType.STRING)
+    private Grade grade ;
+...
+}
+----
+
+=== Annotations
+
+* @XmlRootElement : indique que les objets seront
+des objets racine des documents XML que nous
+allons générer. Le nom passé en attribut
+correspond au nom de l'élément racine du
+document XML généré. Le namespace est lui
+l'espace de noms utilisé
+* @XmlAccessorType : indique que les champs de la
+classe Marin seront lus directement, sans passer
+par les getters . [ ou XmlAccessType.PROPERTY ]
+* @XmlAttribute : indique que ce champ doit être
+écrit dans un attribut plutôt qu'un sous-élément.
+Le nom de cet attribut est précisé en tant
+qu'attribut de cette annotation.
+
+=== Création document XML
+
+[source,java]
+----
+public static void main(String[] args) throws JAXBException {
+// création d'un objet de type Marin
+    Marin marin = new Marin() ;
+    marin.setId(15L) ; marin.setNom("Surcouf") ;
+    marin.setGrade(Grade.PACHA) ;
+    // création d'un contexte JAXB sur la classe Marin
+    JAXBContext context = JAXBContext.newInstance(Marin.class) ;
+    // création d'un marshaller à partir de ce contexte
+    Marshaller marshaller = context.createMarshaller() ;
+    marshaller.setProperty("jaxb.encoding", "UTF-8") ; // on choisit UTF-8
+    marshaller.setProperty("jaxb.formatted.output", true) ; // formatter ce fichier
+    // écriture finale du document XML dans un fichier surcouf.xml
+    marshaller.marshal(marin, new File("surcouf.xml")) ;
+}
+----
+
+=== Résultat
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"
+standalone="yes"?>
+<ns2:marin
+xmlns:ns2="http://orleans.miage.fr/courswsi" id="15">
+<nom>Surcouf</nom>
+<grade>PACHA</grade>
+</ns2:marin>
+----
+
+=== Lecture de document XML
+
+[source,java]
+----
+public class FromXML {
+    public static void main(String[] args) throws JAXBException {
+        // création d'un contexte JAXB sur la classe Marin
+        JAXBContext context =
+            JAXBContext.newInstance(Marin.class) ;
+        // création d'un unmarshaller
+        Unmarshaller unmarshaller =
+            context.createUnmarshaller() ;
+        Marin surcouf = (Marin)unmarshaller.unmarshal(new
+        File("surcouf.xml")) ;
+        System.out.println("Id = " + surcouf.getId()) ;
+        System.out.println("Nom = " + surcouf.getNom()) ;
+----
+
+=== Exemple
+
+* Annotation des classes du « modèle »
+* Lecture/écriture de documents XML très simple en JAXB pour des cas simples de
+classes/mapping
+* Intégration dans JEE5 / JEE6 / JEE7…
+* Possibilité de traiter des cas plus complexes
+
+=== 1er problème
+
+Changer le type généré en JSON ?
+----
+marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");
+marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
+----
+
+Résultat :
+
+Exception in thread "main" Exception in thread
+"main" javax.xml.bind.PropertyException: name:
+eclipselink.media-type value: application/json
+
+=== Comment faire du JSON ?
+
+Par défaut, pas de Provider JSON
+
+=> Utiliser une librairie une librairie qui le supporte
+: Jettison, JaxMe, MOXy…
+
+MOXy inclus dans EclipseLink (JPA !)
+
+
+Changer le Provider par MOXy :
+Fichier jaxb.properties dans package, définir :
+
+javax.xml.bind.context.factory=
+org.eclipse.persistence.jaxb.JAXBContextFactory
+
+
+Pour Jersey, dépendances à ajouter dans le pom
+
+Pas de normalisation => cf Docs
+
+=== Résultat Moxy
+
+* Run :
++
+[source,java]
+----
+marshaller.setProperty(MarshallerProperties.MEDIA_TYPE,"application/json");
+marshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT,false);
+marshaller.marshal(marin, System.out);
+----
+
+* Résultat :
++
+[source,json]
+----
+{
+"id" : 15,
+"nom" : "Surcouf",
+"grade" : "PACHA"
+}
+----
+
+=== Annotations JAXB
+
+La sérialisation : Je maîtrise !
+
+un schéma XML permet de contraindre un document XML de façon plus forte
+qu'une classe ne contraint une instance eg la notion d'ordre des champs dans
+une classe n'existe pas en Java.
+Au contraire, la notion d'ordre des sous-éléments d'un élément racine ou non
+existe en XML
+
+=> Compléter les informations de Classe
+
+
+=== Annotations principales
+
+De 3 types :
+
+* Placées sur un package
+* Placées sur les classes ou énumérations
+* Placées dans les classes sur les champs ou getters
+
+=== @XmlSchema
+
+Fixe les schémas XML utilisés pour écrire les documents XML générés
+Annotation sur package
+Fichier « package-info.java », contenant la javadoc, les annotations et juste la
+déclaration du package
+
+=== @XmlSchema : déclaration
+
+Exemple :
+
+[source,java]
+----
+// fichier package-info.java
+@XmlSchema (
+xmlns = {
+    @XmlNs(prefix="orl", namespaceURI="http://orleans.univ.fr/cours-jaxb"),
+    @XmlNs(prefix="xsd", namespaceURI="http://www.w3.org/2001/XMLSchema") },
+    namespace="http://orleans.univ.fr/cours-jaxb",
+    elementFormDefault=XmlNsForm.QUALIFIED,
+    attributeFormDefault=XmlNsForm.UNQUALIFIED
+)
+package modele;
+----
+
+=== @XmlSchema : résultat
+
+Déclaration générée :
+[source,xml]
+----
+<xs:schema
+elementFormDefault="qualified"
+attributeFormDefault="unqualified"
+targetNamespace="http://orleans.univ.fr/cours-jaxb"
+xmlns:orl="http://orleans.miage.fr/cours-jaxb"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+version="1.0" >
+----
+
+=== Sur les classes
+
+@XmlRootElement associe la classe
+annotée avec un nœud racine d'un
+document XML. Dans les cas simples,
+c'est la seule annotation que l'on trouve
+sur une classe ; Suffisante
+
+@XmlType permet plusieurs choses. Le
+point principal est son attribut
+propOrder, qui permet de fixer l'ordre
+dans lequel les champs de cette classe
+doivent être enregistrés dans le
+document XML
+
+=== Sur les classes
+
+Exemple de @XmlType
+
+[source,java]
+----
+@XmlRootElement(name="marin")
+@XmlType(propOrder={"nom", "prenom", "age"})
+public class Marin {
+@XmlAttribute(name="id")
+private long id ;
+private String nom, prenom ;
+private age ; …
+}
+----
+
+=== Sur les classes
+
+@XmlAccessorType : par def, tous les champs ou propriétés d'une
+classe sont pris en compte lors de la génération de XML [sauf ceux
+qui sont annotés @XmlTransient]
+
+Par défaut, JAXB prend en compte toutes les propriétés publiques
+et les champs annotés. Donc si l'on annote un champ privé, sans
+annoter la classe avec @XmlAccessType.FIELD =>JAXB verra deux
+fois le même champ : une fois du fait de l'annotation, et la
+deuxième fois du fait qu'il prend en compte le getter public.
+
+Les valeurs que peut prendre cette annotation sont les suivantes :
+
+* @XmlAccessType.FIELD : indique que tous les champs non statiques de
+la classe sont pris en compte ;
+* @XmlAccessType.PROPERTY : indique que toutes les paires de getters /
+setters sont prises en compte ;
+* @XmlAccessType.PUBLIC : indique que toutes les paires de getters /
+setters et tous les champs publics non statiques seront pris en compte ;
+* @XmlAccessType.NONE : indique qu'aucun champ ou propriété n'est
+pris en compte
+
+=== Sur les classes
+
+@XmlEnum permet de préciser la façon
+dont les valeurs d'une énumération vont
+être écrites dans le code XML
+
+@XmlEnum fonctionne comme
+l'annotation JPA @EnumeratedType, qui
+permet d'imposer d'écrire en base le
+nom des valeurs énumérées plutôt que
+le numéro d'ordre
+
+=== Sur les classes
+
+[source,java]
+----
+// énumération Grade
+@XmlType
+@XmlEnum(String.class)
+public enum Grade {
+    MATELOT, BOSCO, PACHA, CUISINIER
+}
+----
+
+[source,xml]
+----
+// Schéma XML généré
+<xsd:simpleType name="Grade">
+<xsd:restriction base="xsd:string"/>
+<xsd:enumeration value="MATELOT"/>
+<xsd:enumeration value="BOSCO"/>
+<xsd:enumeration value="PACHA"/>
+<xsd:enumeration value="CUISINIER"/>
+</xsd:simpleType>
+----
+
+=== Sur les classes
+
+[source,java]
+----
+// énumération Grade
+@XmlType
+@XmlEnum(Integer.class)
+public enum Grade {
+@XmlEnumValue("10") MATELOT,
+@XmlEnumValue("20") BOSCO,
+@XmlEnumValue("30") PACHA,
+@XmlEnumValue("40") CUISINIER
+}
+----
+
+[source,xml]
+----
+// Schéma XML généré
+<xsd:simpleType name="Grade">
+<xsd:restriction base="xsd:int"/>
+<xsd:enumeration value="10"/>
+<xsd:enumeration value="20"/>
+<xsd:enumeration value="30"/>
+<xsd:enumeration value="40"/>
+</xsd:simpleType>
+----
+
+=== Sur un champ ou getter
+
+@XmlElement permet d'associer un
+champ ou un getter à un nœud d'un
+document XML. Il permet de spécifier le
+nom de cet élément, son espace de
+nom, sa valeur par défaut, etc...
+
+@XmlTransient : sur un champ ou un
+getter le retire des éléments pris en
+compte pour la création des schémas et
+des documents XML
+
+=== Sur un champ ou getter
+
+@XmlElementWrapper et @XmlElements
+Si le champ ou le getter que l'on annote est
+de type List, alors on peut spécifier les
+choses plus finement
+
+Une List Java permet d'enregistrer des
+éléments de différents types [générique ou
+non]
+
+En utilisant l'annotation @XmlElements, on
+peut spécifier que chaque élément de la
+liste, du fait de sa classe, est associée à un
+nœud différent
+
+=== Sur un champ ou getter
+
+Exemple :
+[source,java]
+----
+@XmlRootElement(name="bateau")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Bateau {
+    @XmlAttribute
+    private long id;
+    @XmlElement(name = "nom")
+    private String nom;
+    @XmlElementWrapper(name = "equipage")
+    @XmlElements({
+    @XmlElement(name = "marin", type = Marin.class),
+    @XmlElement(name = "capitaine", type = Capitaine.class),
+    @XmlElement(name = "cuisinier", type = Cuisinier.class)
+    })
+    private List<Marin> equipage = new ArrayList<Marin>();
+----
+
+=== Sur un champ ou getter
+
+Résultat :
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bateau xmlns:ns2="http://orleans.miage.fr/cours-jaxb"
+id="3">
+<nom>Altaïr</nom>
+<equipage>
+<marin id="10"> <nom>Surcouf</nom></marin>
+<cuisinier id="20"> <nom>Cook</nom></cuisinier>
+<capitaine id="30">
+<nom>Magellan</nom></capitaine>
+</equipage>
+</bateau>
+----
+
+=== Sur un champ ou un getter
+
+@XmlList se pose sur des champs ou
+getters de type List, et n'est valide que
+lorsque ces listes portent des types
+primitifs Java, des classes enveloppe, ou
+des chaînes de caractères ( String).
+Dans ce cas, la liste est écrite dans un
+unique élément XML, et ses éléments
+sont séparés par des espaces
+
+=== Sur un champ ou getter
+
+Exemple :
+[source,java]
+----
+@XmlRootElement
+public class Tableau {
+    @XmlElement
+    @XmlList
+    private List<String> nombres = new ArrayList<String>();
+    public List<String> getNombres() {
+        return this.nombres;
+    }
+}
+----
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<tableau>
+<nombres>un deux trois</nombres>
+</tableau>
+----
+
+=== Sur un champ ou un getter
+
+@XmlAttribute : Cet élément permet d'écrire le
+champ annoté dans un attribut XML plutôt que dans
+un sous-élément de l'élément XML parent. On peut
+fixer le nom de cet attribut, l'espace de noms auquel il
+appartient et imposer qu'il soit présent (attribut
+required)
+
+@XmlValue : Une classe donnée ne peut avoir plus
+d'un champ ou getter annoté par @XmlValue. Indique
+que les instances de cette classe sont représentées
+par une valeur simple unique, donnée par le champ
+qui porte cette annotation. Ainsi, lorsque ces objets
+seront utilisés ailleurs, ils seront représentés par cette
+valeur simple
+
+=== Sur un champ ou getter
+
+Exemple @XmlValue
+
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Salaire {
+    @XmlValue
+    private int montant ; …
+}
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Marin {
+    private Salaire salaire ; …
+}
+
+=== Sur un champ ou getter
+
+Résultat pour un marin :
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"
+standalone="yes"?>
+<marin>
+<salaire>100</salaire>
+</marin>
+----
+
+=== Générer un schéma
+
+Une classe annotée peut être utilisée pour générer un schéma XML. Les
+documents XML générés seront valides par rapport à ce schéma
+
+Pour cette génération, il faut utiliser un
+utilitaire Java qui fait partie de la
+distribution de JAXB [cf site JAXB] : schemagen
+
+schemagen peut s'utiliser au travers d'un plugin Maven
+
+=== Exemple
+
+
+[source,java]
+----
+@XmlRootElement(name="marin",
+namespace="http://orleans.miage.fr/cours-jaxb")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(propOrder={"nom", "prenom", "grade",
+"age"})
+public class Marin {
+@XmlAttribute(name="id") private long id ;
+@XmlElement(required=true) private String nom ;
+private String prenom ;
+private long age ;
+private Grade grade ; …}
+
+@XmlRootElement(name="bateau")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Bateau {
+@XmlAttribute private long id ;
+private String nom ;
+@XmlElementWrapper(name="equipage")
+private List<Marin> equipage = new
+ArrayList<Marin>() ;
+…
+}
+----
+
+=== Deux schémas générés
+
+.Marin.xsd
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"
+standalone="yes"?>
+<xs:schema version="1.0"
+targetNamespace="http://orleans.miage.fr/cours
+-jaxb"
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+<xs:import schemaLocation="schema2.xsd"/>
+<xs:element name="marin" type="marin"/>
+</xs:schema>
+----
+
+.Schema2.xsd
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:ns1="http://orleans.miage.fr/cours-jaxb"
+xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:import namespace="http://orleans.miage.fr/cours-jaxb"
+schemaLocation="marin.xsd"/>
+<xs:element name="bateau" type="bateau"/>
+<xs:complexType name="bateau">
+<xs:sequence>
+<xs:element name="nom" type="xs:string" minOccurs="0"/>
+<xs:element name="equipage" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="equipage" type="marin" nillable="true"
+minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+<xs:attribute name="id" type="xs:long" use="required"/>
+</xs:complexType>
+
+
+<xs:complexType name="marin">
+<xs:sequence>
+<xs:element name="nom" type="xs:string"/>
+<xs:element name="prenom" type="xs:string" minOccurs="0"/>
+<xs:element name="grade" type="grade" minOccurs="0"/>
+<xs:element name="age" type="xs:long"/>
+</xs:sequence>
+<xs:attribute name="id" type="xs:long" use="required"/>
+</xs:complexType>
+
+
+<xs:simpleType name="grade">
+<xs:restriction base="xs:string">
+<xs:enumeration value="MATELOT"/> <xs:enumeration
+value="BOSCO"/> <xs:enumeration value="PACHA"/>
+<xs:enumeration value="CUISINIER"/> </xs:restriction>
+</xs:simpleType>
+</xs:schema>
+----
+
+=== Générer des classes
+
+Génération de classes de schémas
+
+La génération d'un jeu de classes utilise
+un autre utilitaire fourni dans la distribution JAXB : xjc
+
+On peut utiliser un plugin maven
+Lecture des xsd et génération des
+classes correspondantes
+
+A utiliser pour faire un client
+
+=== xjc
+
+Génère toutes les classes du modèle ET une classe ObjectFactory
+C’est une classe fabrique, qui expose
+autant de méthodes que nous avons de
+classes générées
+
+=== ObjectFactory : utilisation
+
+Exemple :
+[source,java]
+----
+public static void main(String... args) {
+ObjectFactory factory = new ObjectFactory() ;
+
+Marin marin = factory.createMarin() ;
+Bateau bateau = factory.createBateau() ;
+Bateau.Equipage equipage =
+factory.createBateauEquipage() ;
+bateau.setEquipage(equipage) ;
+bateau.getEquipage().getEquipage().add(marin) ;
+}
+----
+
+=== Références
+
+* Java le soir, Blog de José Paumard
+* JAXB
+* MOXy EclipseLink
+* Mojo maven plugins pour JAXB
+
+
+== Complément Sérialisation
+
+Objets
+JSON, XML…
+
+=== Le problème :
+
+Relations toujours BI-directionnelles en Java
+
+[source,java]
+----
+public class User {
+    public int id;
+    public String name;
+    public List<Item> userItems;
+}
+public class Item {
+    public int id;
+    public String itemName;
+    public User owner;
+}
+----
+
+
+=== Sérialisation XML/JSON ?
+
+Sérialisation XML/JSON :
+
+----
+com.fasterxml.jackson.databind.JsonMappingException:
+Infinite recursion (StackOverflowError) (through reference chain:
+org.baeldung.jackson.bidirection.Item["owner"]
+>org.baeldung.jackson.bidirection.User["userItems"]
+->java.util.ArrayList[0]
+->org.baeldung.jackson.bidirection.Item["owner"]
+->…..
+----
+
+=== Solution 1 : on aide Jackson
+
+@JsonManagedReference is the forward part of reference – the one
+that gets serialized normally.
+
+@JsonBackReference is the back part of reference – it will be omitted
+from serialization.
+
+[source,java]
+----
+public class User {
+    public int id;
+    public String name;
+    @JsonBackReference
+    public List<Item> userItems;
+}
+public class Item {
+    public int id;
+    public String itemName;
+    @JsonManagedReference
+    public User owner;
+}
+----
+
+=== Solution 1 : on aide Jackson
+
+Résultat :
+[source,json]
+----
+{
+"id":2,
+"itemName":"book",
+"owner":
+{
+"id":1,
+"name":"John"
+}
+}
+----
+
+=== Solution 2 : @JsonIdentityInfo
+
+Exemple :
+[source,java]
+----
+@JsonIdentityInfo(
+generator =
+ObjectIdGenerators.PropertyGenerator.class,
+property = "id")
+public class User { ... }
+@JsonIdentityInfo(
+generator =
+ObjectIdGenerators.PropertyGenerator.class,
+property = "id")
+public class Item { ... }
+----
+
+=== Solution 2 : @JsonIdentityInfo
+
+Résultat :
+[source,json]
+----
+{
+"id":2,
+"itemName":"book",
+"owner":
+{
+"id":1,
+"name":"John",
+"userItems":[2]
+}
+}
+----
+
+=== Solution 3 : @JsonIgnore
+
+On ignore l’un des sens de la relation
+
+Eg
+[source,java]
+----
+public class User {
+public int id;
+public String name;
+@JsonIgnore
+public List<Item> userItems;
+}
+----
+
+Résultat :
+[source,json]
+----
+{
+"id":2,
+"itemName":"book",
+"owner":
+{
+"id":1,
+"name":"John"
+}
+}
+----
+
+=== Solution 4 : @JsonView
+
+Des interfaces de marquage (flag)
+
+Définition dans une classe
+
+Public ou pas si dans le même package
+
+[source,java]
+----
+public class Views {
+    public static class Resume {}
+    public static class Complet extends Resume {}
+}
+----
+
+=== Solution 4 : @JsonView
+
+Sur les classes :
+[source,java]
+----
+public class User {
+    @JsonView(Views.Resume.class)
+    public int id;
+    @JsonView(Views.Resume.class)
+    public String name;
+    @JsonView(Views.Complet.class)
+    public List<Item> userItems;
+}
+public class Item {
+    @JsonView(Views.Resume.class)
+    public int id;
+    @JsonView(Views.Resume.class)
+    public String itemName;
+    @JsonView(Views.Resume.class)
+    public User owner;
+}
+----
+
+=== Solution 4 : @JsonView
+
+Lors de la sérialisation, on choisit la vue :
+
+[source,java]
+----
+@JsonView(View.Resume.class)
+@RequestMapping(value = "/users", method = RequestMethod.GET)
+public Collection<User> getAllUser() {
+    return userRepository.findAll();
+}
+@JsonView(View.Complete.class)
+@RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
+public User getUserById(@PathVariable Long id) {
+    return userRepository.findOne(id);
+}
+----
+
+=== Solution 5 : Custom Serializer/de
+
+Contrôle total de la sérialisation/dé-sérialisation
+
+Eg
+[source,java]
+----
+public class CustomListSerializer extends StdSerializer<List<Item>>{
+    public CustomListSerializer() {
+        this(null);
+    }
+    public CustomListSerializer(Class<List> t) {
+        super(t);
+    }
+    @Override
+    public void serialize(List<Item> items, JsonGenerator generator, SerializerProvider provider)
+        throws IOException, JsonProcessingException {
+        List<Integer> ids = new ArrayList<>();
+        for (Item item : items) {
+        ids.add(item.id);
+        }
+        generator.writeObject(ids);
+    }
+}
+----

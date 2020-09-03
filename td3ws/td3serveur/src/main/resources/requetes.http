@@ -1,0 +1,33 @@
+### sequence de test à exécuter dans l'ordre
+
+
+
+GET http://localhost:8080/allucine/film
+
+###
+POST http://localhost:8080/allucine/film
+Content-Type: application/json
+
+{"titre":"The blues brothers","realisateur":"John Landis", "acteurs":["John Belushi","Dan Aykroyd"], "resume":"Jack et Elwood voient la lumière et sauvent l'orphelinat","sortie":"1980"}
+
+###
+
+POST http://localhost:8080/allucine/util
+Content-Type: application/json
+
+{"nom":"Poirot","prenom":"Hercule","pseudo":"Hercule"}
+
+###
+
+POST http://localhost:8080/allucine/sondage
+idUtil: 1
+
+monsondage
+
+###
+POST http://localhost:8080/allucine/sondage/monsondage/film
+idUtil: 1
+
+1
+
+###

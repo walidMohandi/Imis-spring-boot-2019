@@ -1,0 +1,577 @@
+= Webservices : Serveur REST
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+Développer des Web Services REST avec JAVA
+
+== 2 librairies nécessaires
+
+* 2 parties nécessaires pour déployer des WS-REST :
+** La gestion des requêtes-réponses
+** Le mapping objets Java – données sérialisées ( xml, json, …)
+
+* 2 implémentations de librairies Java
+** JAX-RS / Spring MVC : comment déployer des services
+REST en Java (mapping requête <-> méthode)
+** JAXB / Jackson : comment traduire des objets java en
+xml/json/… de manière « automatique »
+
+== Mais alors c’est « simple » ?
+
+* Le + utilisé : Spring MVC
+* Annotations légèrement différentes par
+rapport à la “norme” JAX-RS
+@RequestMapping
+* Utilisation de Spring Boot
+
+== Spring MVC
+
+* Annotations dans le code
+** Sur les classes
+** Sur les méthodes
+
+=== Annotations Spring MVC
+
+* @RestController
+* @RequestMapping(method=?) : classe et/ou méthode, avec raccourcis :
+** @GetMapping
+** @PostMapping
+** @PutMapping
+** @PatchMapping
+** @DeleteMapping
+
+
+=== Annotations Spring MVC
+
+* Paramètres (injection dans paramètres):
+** @RequestParam
+** @PathVariable
+** @…
+
+Démo ; Cf https://projects.spring.io/spring-framework/
+dans la bonne version
+
+
+=== Exemple GET
+
+[source,java]
+----
+@RestController
+@RequestMapping(path="/design",produces="application/json")
+@CrossOrigin(origins="*")
+public class DesignTacoController {
+    private TacoRepository tacoRepo;
+    @Autowired
+    EntityLinks entityLinks;
+    public DesignTacoController(TacoRepository tacoRepo) {
+        this.tacoRepo = tacoRepo;
+    }
+    @GetMapping("/recent")
+    public Iterable<Taco> recentTacos() {
+        PageRequest page = PageRequest
+            .of(0, 12, Sort.by("createdAt").descending());
+        return tacoRepo.findAll(page).getContent();
+    }
+}
+----
+
+=== Exemple GET paramétré
+
+[source,java]
+----
+@RestController
+@RequestMapping(path="/design",produces="application/json")
+@CrossOrigin(origins="*")
+public class DesignTacoController {
+    …
+    @GetMapping("/{id}")
+    public Taco tacoById(@PathVariable("id") Long id) {
+        Optional<Taco> optTaco = tacoRepo.findById(id);
+        if (optTaco.isPresent()) {
+            return optTaco.get();
+        }
+        return null;
+    }
+…
+}
+----
+
+=== Exemple GET paramétré+return
+
+[source,java]
+----
+@RestController
+@RequestMapping(path="/design",produces="application/json")
+@CrossOrigin(origins="*")
+public class DesignTacoController {
+    …
+    @GetMapping("/{id}")
+    public ResponseEntity<Taco> tacoById(@PathVariable("id") Long id) {
+        Optional<Taco> optTaco = tacoRepo.findById(id);
+        if (optTaco.isPresent()) {
+            return new ResponseEntity<>(optTaco.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+…
+}
+----
+
+=== Création de données
+
+
+[source,java]
+----
+@PostMapping(consumes="application/json")
+@ResponseStatus(HttpStatus.CREATED)
+public Taco postTaco(@RequestBody Taco taco) {
+return tacoRepo.save(taco);
+}
+----
+
+=== MAJ de données
+
+Option 1 :
+[source,java]
+----
+@PutMapping("/{orderId}")
+public Order putOrder(@RequestBody Order order) {
+    return repo.save(order);
+}
+----
+
+=== MAJ de données
+
+Option 2 :
+[source,java]
+----
+@PatchMapping(path="/{orderId}", consumes="application/json")
+public Order patchOrder(@PathVariable("orderId") Long orderId, @RequestBody Order patch) {
+    Order order = repo.findById(orderId).get();
+    if (patch.getDeliveryName() != null) {
+        order.setDeliveryName(patch.getDeliveryName());
+    }
+    if (patch.getDeliveryStreet() != null) {
+        order.setDeliveryStreet(patch.getDeliveryStreet());
+    }
+    …
+    if (patch.getCcExpiration() != null) {
+        order.setCcExpiration(patch.getCcExpiration());
+    }
+    return repo.save(order);
+}
+----
+
+=== DEL de données
+
+[source,java]
+----
+@DeleteMapping("/{orderId}")
+@ResponseStatus(code=HttpStatus.NO_CONTENT)
+public void deleteOrder(@PathVariable("orderId") Long orderId) {
+    try {
+        repo.deleteById(orderId);
+    } catch (EmptyResultDataAccessException e) {}
+    }
+----
+
+=== Annotations Spring MVC
+
+Cf TP
+
+Gestion des erreurs : mapping auto
+exception ↔ HttpStatus
+
+[source,java]
+----
+@ResponseStatus(HttpStatus.NOT_FOUND)
+class UserNotFoundException extends RuntimeException {
+    public UserNotFoundException(String userId) {
+        super("could not find user '" + userId + "'.");
+    }
+}
+----
+
+=== Déploiement
+
+* Utilisation de SpringBoot
+* Les starters à regarder : spring-bootstarter-*
+** Web !
+** Actuator
+** Devtools
+** Jackson-dataformat-*
+** Hateoas
+** Security
+
+
+
+== JAX-RS
+
+
+Acronyme de Java API for RestFul Web Services
+
+* Version courante 2.0 décrite par JSR 339
+* Depuis la version 1.1, il fait partie
+intégrante de la spécification Java EE 6+
+* Décrit la mise en œuvre des services
+REST web coté backend
+* Son architecture se repose sur l’utilisation
+des classes et des annotations pour
+développer les services web
+
+=== JAX-RS - Implémentation
+
+JAX-RS est une *spécification* et autour de
+cette spécification sont développés
+plusieurs implémentations :
+
+* JERSEY : implémentation de référence (https://eclipse-ee4j.github.io/jersey/)
+* CXF : Apache (http://cfx.apache.org )
+* RESTEasy : JBoss
+* RESTLET : L’un des premiers framework implémentant REST pour Java
+
+=== JERSEY
+
+Version actuelle 2.30 implémentant les
+spécifications de JAX-RS 2.1
+
+* Intégré dans Glassfish et l’implémentation Java EE (6,7,8)
+* Anciennement supportés dans Netbeans/Glassfish
+* maintenant Jakarta EE
+
+
+=== JAX-RS : Développement
+
+* Basé sur POJO (Plain Old Java Object) en
+utilisant des annotations spécifiques JAX-RS
+* Pas de modifications dans les fichiers de
+configuration
+* Le service est déployé dans une application
+web (ou EJB)
+* Pas de possibilité de développer le service à
+partir d’un WADL contrairement à SOAP
+* Approche Bottom/Up
+** Développer et annoter les classes
+** Le WADL est automatiquement généré par l’API
+
+
+=== Annotations
+
+JAX-RS utilise des annotations Java pour
+exposer les services REST
+
+* @Path : Chemin d’accès à la ressource
+* @GET ， @PUT, @POST ， @DELETE : Type de requête (verbe http)
+* @Consumes : Type de donnée en entrée
+* @Produces : Type de donnée en sortie
+* @PathParam, @QueryParam, @HeaderParam,
+@CookieParam, @MatrixParam, @FormParam
+* + JAXB permet aussi de traiter des Objets (en
+paramètres d’entrée ou en retour) en Objet XML ou JSON
+
+
+=== JAX-RS : contextes URI concaténés
+
+Les URIs des ressources sont générées par concaténation des contextes
+
+* de déploiement : le serveur
+* de l'application, @ApplicationPath
+* des ressources locales @Path
+
+
+=== JAX-RS : @ApplicationPath contexte
+
+Configuration du contexte global de l’application
+
+* @ApplicationPath("api")
+
+* Concaténé au contexte de deploy
+
+* Racine des ressources @Path
+
+
+
+
+=== JAX-RS : @Path sur une classe
+
+L’annotation permet de rendre une classe accessible par une requête HTTP
+
+* Elle définit la racine des ressources (Root Racine Ressources)
+* La valeur donnée correspond à l’uri *relative* de la ressource
+
+[source,java]
+----
+@Path("categorie")
+public class CategoryFacade {
+    ...
+}
+----
+
+=== JAX-RS : contextes concaténés
+
+Exemple : URI `http://localhost:8080/Bibliotheque/api/categorie`
+
+Contexte de déploiement de l’application : http://localhost:8080/Bibliotheque/ (serveur)
+
+Contexte de l'application JAX-RS : `api` * @ApplicationPath("api")
+
+Contexte de la ressource : `categorie` @Path("categorie")
+
+
+
+=== JAX-RS : @Path sur une méthode
+
+L’annotation peut être utilisée pour annoter des méthodes d’une classe
+
+L’URI résultante est la *concaténation* entre le
+valeur de @Path de la classe et celle de la
+méthode
+
+[source,java]
+----
+@Path("categorie")
+public class CategoryFacade {
+    @GET
+    @Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+    @Path("hello")
+    public String hello() {
+        return "Hello World!";
+    }
+..
+}
+----
+
+`http://localhost:8080/Bibliotheque/api/categorie/hello`
+
+
+=== JAX-RS : @Path dynamique
+
+La valeur définie dans l’annotation @Path n’est
+forcément un constante, elle peut être variable.
+
+Possibilité de définir des expressions plus
+complexes, appelées Template Parameters
+
+Les contenus complexes sont délimités par
+« {} »
+
+Possibilité de mixer dans la valeur @Path des
+expressions
+
+[source,java]
+----
+@GET
+@Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Path("{nom}")
+public String hello (@PathParam("nom") String nom){
+    return "Hello " + nom;
+}
+----
+
+`http://localhost:8080/Bibliotheque/webresources/category/hello/fred`
+
+
+=== JAX-RS : @Path dynamique
+
+On peut limiter le match des paths dynamique avec des expressions régulières
+
+Exemple :
+[source,java]
+----
+@Path("users/{username: [a-zA-Z][a-zAZ_0-9]*}")
+----
+
+=== @GET, @POST, @PUT, @DELETE
+
+Restriction des mappings par verbe HTTP sur les méthodes Java
+
+* Permettent de mapper une méthode à un type de requête HTTP
+
+* Ne sont utilisables que sur des méthodes
+
+* Le nom de la méthode n’a pas d’importance, JAX détermine la
+méthode à exécuter en fonction de la requête
+
+[source,java]
+----
+@Path("categorie")
+public class CategoryFacade {
+    @GET
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Path("test")
+    public String hello() {
+        return "Hello World!";
+    }
+..
+}
+----
+
+`curl -X GET http://localhost:8080/Bibliotheque/api/categorie/test`
+
+[source,java]
+----
+@GET
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@Path("{nom}")
+public String hello (@PathParam("nom") String nom){
+    return "Hello " + nom;
+}
+----
+`curl -X GET http://localhost:8080/Bibliotheque/api/categorie/fred`
+
+=== @GET, @POST, @PUT, @DELETE
+
+Les opérations CRUD sur les ressources sont réalisées au travers des méthodes
+de la requête HTTP
+
+Exemple :
+
+.URIs du service
+[cols="1,2a,2a,2a,2a"]
+|===
+|URI |GET |POST |PUT |DELETE 
+
+|/livre
+| Liste des livres
+| Créer un nouveau livre
+| X
+| X
+
+| /livre/{id}
+| Renvoie le Livre identifié par l’id
+| X
+| Mise à jour du livre identifié par id
+| Supprimer le livre identifié par id
+
+|===
+
+
+=== @GET, @POST, @PUT, @DELETE
+
+[source,java]
+----
+@Path("livre")
+public class LivreFacadeREST extends AbstractFacade<Livre> {
+    @POST
+    @Consumes({"application/xml", "application/json"})
+    public void create(Livre entity) {
+        super.create(entity);
+    }
+    @GET
+    @Produces({"application/xml", "application/json"})
+    public List<Livre> findAll() {
+        return super.findAll();
+    }
+…
+----
+
+=== @GET, @POST, @PUT, @DELETE
+
+[source,java]
+----
+@PUT
+@Path("{id}")
+@Consumes({"application/xml", "application/json"})
+public void edit((@PathParam("id") Long id , Livre entity) {
+    super.edit(entity);
+}
+@DELETE
+@Path("{id}")
+public void remove(@PathParam("id") Long id) {
+    super.remove(super.find(id));
+}
+@GET
+@Path("{id}")
+@Produces({"application/xml", "application/json"})
+public Livre find(@PathParam("id") Long id) {
+    return super.find(id);
+}
+----
+
+=== @GET, @POST, @PUT, @DELETE
+
+Pensez au range pour les collections !
+
+[source,java]
+----
+@GET
+@Path("{from}/{to}")
+@Produces({"application/xml", "application/json"})
+public List<Livre> findRange(@PathParam("from")Integer from, @PathParam("to")Integer to) {
+    return super.findRange(new int[]{from, to});
+}
+}
+----
+
+=== Paramètres des requêtes
+
+JAX-RS fournit des mécanismes pour extraire des
+paramètres dans la requête
+
+Utilisés sur les paramètres des méthodes des
+ressources pour réaliser des injections de contenu
+
+Différentes annotations :
+
+* @PathParam : valeurs dans templates parameters
+* @QueryParam : valeurs des paramètres de la requête
+* @FormParam : Valeurs des paramètres de formulaire
+* @HeaderParam: Valeurs dans l’en tète de la requête
+* @CookieParam : Valeurs des cookies
+* @Context : Informations liés au contexte de la ressource
+
+=== Paramètres des requêtes
+
+Exemple avec Default :
+
+[source,java]
+----
+@Path("smooth")
+@GET
+public Response smooth(
+    @DefaultValue("2") @QueryParam("step") int step,
+    @DefaultValue("true") @QueryParam("min-m") boolean hasMin,
+    @DefaultValue("true") @QueryParam("max-m") boolean hasMax,
+    @DefaultValue("true") @QueryParam("last-m") boolean hasLast,
+    @DefaultValue("blue") @QueryParam("min-color") ColorParam minColor,
+    @DefaultValue("green") @QueryParam("max-color") ColorParam maxColor,
+    @DefaultValue("red") @QueryParam("last-color") ColorParam lastColor) {
+...
+}
+----
+
+Remarque : si parsing échoue, 404
+
+=== Paramètres des requêtes
+
+Pour les objets en paramètre, il faut :
+
+. être un type primitif,
+. avoir un constructeur(String)
+. avoir une méthode `static` valueOf(String) ou fromString(String) (eg Integer.valueOf(String) java.util.UUID.fromString(String));
+. avoir une (register) implémentation de
+`javax.ws.rs.ext.ParamConverterProvider` qui retourne une instance
+de `javax.ws.rs.ext.ParamConverter` capable de conversion de/vers String
+. être une collection List<T>, Set<T> or SortedSet<T>, où T satisfait 2 ou 3
+
+
+=== Et la response ?
+
+* Retour "normal"
+** Type primtif
+** String
+** Objets java [!]
+
+* une Response HTTP
+** Permet de construire une réponse HTTP
+complète [status, entete, …]
+** Eg POST avec Location, cf exemple Sondage
+
+=== De nombreuses autres subtilités
+
+Cf Doc Jersey
+
+https://eclipse-ee4j.github.io/jersey.github.io/documentation/latest/index.html

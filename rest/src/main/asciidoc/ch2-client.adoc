@@ -1,0 +1,408 @@
+= Webservices : Client REST
+ifndef::masterdoc[]
+include::_header.adoc[]
+endif::masterdoc[]
+
+== Et côté client ?
+
+Comment on appelle une API REST ?
+
+== Les différentes possibilités
+
+* Client http “génériques”
+** Telnet (hum !)
+** Curl
+** Httpie
+** Soapui
+** Karaté
+** IntelliJ, Eclipse, ...
+
+ifdef::backend-revealjs[=== client rest]
+
+* Codage client [Java, .NET, …]
+** Java (JDK natif)
+** Java : Jersey
+** Java : Spring MVC
+** JS natif ou JQuery ou ...
+
+
+== Clients http
+
+Quelques exemples... cf man
+
+=== cUrl
+
+Le + utilisé ; dans un script bash
+
+.Exemple de récupération d'un token
+----
+# get authorization token
+TOKEN=`curl -i -s -X POST -d login=fred -d password=fred http://localhost:8000/login | grep Authorization:`
+# request with token header
+curl -H "$TOKEN" http://localhost:8000/checkToken
+----
+
+=== httpie
+
+en python ; syntaxe simplifiée ; JSON par défaut
+
+.Exemple
+----
+# recup liste des sondages [defaut : JSON]
+http GET :8080/sondage
+
+# recup liste des sondages en XML
+http GET :8080/sondage Accept:application/xml
+
+http GET :8080/sondage/1 Accept:application/xml
+
+# creation d'un sondage [passage par forms avec -f]
+http -f POST :8080/sondage question="oui ou non ?" propositions=oui,non,ptet
+
+# vote sur le sondage précédent
+http -f POST :8080/sondage/2/vote votant=fred choix=ptet
+----
+
+=== Karaté
+
+Suite complète permettant d'écrire des tests (eg en TDD)
+
+https://github.com/intuit/karate
+
+.Exemple
+----
+Feature: karate 'hello world' example
+Scenario: create and retrieve a cat
+
+Given url 'http://myhost.com/v1/cats'
+And request { name: 'Billie' }
+When method post
+Then status 201
+And match response == { id: '#notnull', name: 'Billie' }
+
+Given path response.id
+When method get
+Then status 200
+----
+
+
+== Java – JDK 11+
+
+La nouvelle API HTTP Client propose un
+support des versions 1.1 et 2 du protocole
+HTTP ainsi que les WebSockets côté client.
+
+L’API est fournie en standard dans Java 11+
+
+ifdef::backend-revealjs[=== Java - JDK 11+]
+
+Nouvelle API + “moderne”
+
+* utilisation du design pattern builder
+* utilisation de fabriques pour obtenir des instances des
+builder mais aussi d’implémentations de certaines
+interfaces pour des usages courants
+* utilisation de l’API Flow (reactive streams) pour fournir
+les données du body d’une requête (Flow.Publisher) et
+consommer le body d’une réponse (Flow.Subscriber)
+
+=== Java – HttpClient
+
+L’obtention d’une instance de type HttpClient peut se
+faire de deux manières :
+
+* utilisation de la fabrique `newHttpClient()` de la classe HttpClient
+pour obtenir une instance avec la configuration par défaut
++
+[source,java]
+----
+HttpClient client = HttpClient.newHttpClient();
+----
+
+ifdef::backend-revealjs[=== Java - HttpClient]
+
+* utilisation de l’interface HttpClient.Builder qui est un builder pour
+configurer l’instance obtenue. Une instance du Builder est obtenue
+en utilisant la fabrique newBuilder() de la classe HttpClient
++
+[source,java]
+----
+HttpClient httpClient = HttpClient.newBuilder()
+    .version(HttpClient.Version.HTTP_1_1)
+    .build();
+----
+
+=== Java – HttpRequest
+
+Elle encapsule une requête à envoyer à un serveur.
+
+Une instance de type HttpRequest est obtenue en
+utilisant un builder de type HttpRequest.Builder. Une
+instance de l’interface HttpRequest.Builder est obtenue
+en utilisant la fabrique newBuilder() de la classe
+HttpRequest.
+
+ifdef::backend-revealjs[=== Java - HttpRequest]
+
+Plusieurs méthodes permettent de configurer les
+éléments de la requête : l’uri, le verbe HTTP, les
+headers, un timeout.
+
+[source,java]
+----
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("http://www.oxiane.com/"))
+    .GET()
+    .build();
+----
+
+=== Java – HttpRequest
+
+Plusieurs méthodes permettent de configurer les
+éléments de la requête : l’uri, le verbe HTTP, les
+headers, un timeout.
+[source,java]
+----
+HttpRequest requetePost = HttpRequest.newBuilder()
+    .uri(URI.create("http://demo.com/api/ex"))
+    .setHeader("Content-Type", "application/json")
+    .POST(BodyPublishers.ofString("{"cle1":"valeur1","cle2":"valeur2"}"))
+    .build();
+----
+
+
+=== Java – send
+
+Envoi en mode *synchrone*
+
+* méthode send() de la classe HttpClient. Elle attend en paramètres :
+** la requête
+** une instance de type HttpResponse.BodyHandler qui permet de traiter le body
+selon la réponse
+
+* La classe HttpBodyHandlers propose des fabriques pour obtenir des instances
+de BodyHandler pour des usages courants.
+
+ifdef::backend-revealjs[=== Java - send]
+
+[source,java]
+----
+HttpResponse response;
+    try {
+        response = httpClient.send(requete, BodyHandlers.ofString());
+        System.out.println("Status: " + response.statusCode());
+        System.out.println("Headers: " + response.headers());
+        System.out.println("Body: " + response.body());
+    } catch (IOException | InterruptedException e) {
+        ...
+    }
+----
+
+
+=== Java – sendAsync
+
+Envoi en mode *asynchrone*
+
+* Il se fait en utilisant la méthode sendAsync() de la classe HttpClient. Elle
+attend en paramètres :
+** la requête
+** une instance de type HttpResponse.BodyHandler qui permet de traiter le
+body selon la réponse
+
+* Elle renvoie un CompletableFuture qui permet de définir les traitements à
+exécuter à la réception de la réponse.
+
+ifdef::backend-revealjs[=== Java - sendAsync]
+
+[source,java]
+----
+httpClient.sendAsync(requete, BodyHandlers.ofString())
+    .thenAccept(response -> {
+        System.out.println("Status: " + response.statusCode());
+        System.out.println("Headers: " + response.headers());
+        System.out.println("Body: " + response.body());
+    }
+);
+----
+
+== Jersey
+
+Librairie Java(EE) client et serveur pour REST
+
+
+=== Exemple de Client Jersey
+
+* Création du client (opération lourde) :
++
+[source,java]
+----
+Client client = Client.create();
+----
+
+* Accès à une ressource :
++
+[source,java]
+----
+WebResource webResource =
+    client.resource("http://example.com/base");
+----
+
+* Opérations sur les ressources :
++
+[source,java]
+----
+String s = webResource.accept("text/plain").get(String.class);
+ClientResponse response =
+    webResource.type("text/plain").put(ClientResponse.class, "foo:bar");
+----
+
+=== Exemple de Client Jersey 2
+
+* Fluent API
++
+[source,java]
+----
+client = ClientBuilder.newClient();
+Response response = client
+    .target(BASE_REST_URI)
+    .path(projectKey)
+    .path("repos")
+    .queryParam("limit", 200)
+    .request(MediaType.APPLICATION_JSON)
+    .get();
+if (response.getStatus()==200) {
+    return response.readEntity(Repos.class);
+}
+----
+
+=== Exemple de Client Jersey 3
+
+* Config client
++
+[source,java]
+----
+ClientConfig clientConfig = new ClientConfig();
+HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("login", "motpasse");
+clientConfig.register(feature);
+ObjectMapper om = new ObjectMapper()
+    .registerModule(new JavaTimeModule())
+    .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    .configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false)
+    .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+clientConfig.register(om);
+client = ClientBuilder.newClient(clientConfig);
+----
+
+== Spring MVC
+
+Librairie proposée par Spring pour application Web
+(http)
+
+
+=== Exemple de client Spring
+
+* Création du client (opération lourde) :
++
+[source,java]
+----
+RestTemplate restTemplate = new RestTemplate();
+----
+
+* Opérations sur les ressources :
++
+[source,java]
+----
+Quote quote =
+  restTemplate.getForObject("http://serveur.io/api/random", Quote.class);
+----
+
+
+=== Exemple de client Spring (2)
+
+* Avec header, body :
++
+[source,java]
+----
+// headers
+HttpHeaders httpHeaders = new HttpHeaders();
+//httpHeaders.set("Accept", "*/*");
+// body
+MultiValueMap<String, String> map =
+    new LinkedMultiValueMap<String, String>();
+map.add("attribut", valeur);
+HttpEntity<MultiValueMap<String,String>> httpEntity =
+    new HttpEntity<MultiValueMap<String,String>>(map , httpHeaders);
+String url = “http://serveur:port/urlapi”;
+String res = restTemplate.postForObject(url,httpEntity,String.class);
+----
+
+== JS
+
+[%steps]
+* De TRES nombreux framework
+* Tiens 5 de plus
+* Tiens 5 de plus
+* ...
+
+=== JS Natif
+
+[source,javascript]
+----
+<script language="javascript">
+   var xmlhttp;
+   function initialisation() {
+     // put more code here in case you are concerned
+    // about browsers that do not provide XMLHttpRequest object directly
+     xmlhttp = new XMLHttpRequest();
+     requete();
+   }
+
+   function requete() {
+       var url = "http://localhost:8080/sondages";
+       xmlhttp.open('GET',url,true);
+       xmlhttp.send(null);
+
+       xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == 4) {
+             if ( xmlhttp.status == 200) {
+                var listeSondages = xmlhttp.responseText;
+                var listeIdentifiants = JSON.parse(listeSondages);
+                var select = document.getElementById("mesSondages");
+...
+   };
+----
+
+=== JQuery
+
+[source,javascript]
+----
+<script src="/webjars/jquery/jquery.min.js"></script>
+
+<script language="javascript">
+   $(document).ready(function() {
+       $.ajax({
+          url: "http://localhost:8080/sondages/1", method:'POST', data:'YEP'
+       }).then(function(data) {
+          $('.sondage-id').append(data.id);
+          $('.sondage-libelle').append(data.question);
+       });
+   });
+...
+----
+
+
+== Outils de test
+
+Il existe de nombreux outils [en ligne] permettant de tester les services REST
+
+* Certains sont disponibles sous forme d’extensions que vous pouvez installer
+dans les navigateurs
+** RestConsole
+** PostMan
+
+* D’autres directement (ou plugins) dans l’EDI (IntelliJ, Netbeans, …)
+
+* Ou sous la forme d’outils indépendants : SoapUI, Karaté
+

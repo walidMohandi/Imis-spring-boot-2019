@@ -1,0 +1,56 @@
+= TP1 - exercice 1
+
+
+== Objectifs
+
+
+- Découvrir le déploiement d'un service Rest avec Springboot
+- Dresser une table d'URI à partir du service
+- Maitriser le requêtage
+
+
+
+
+== Enoncé
+
+La classe WsAseApplication permet de lancer un serveur et en particulier un service Rest dont l'implémentation
+peut être trouvée dans le package controleur.
+
+Httpie est un outil d’interrogation de service web, en mode console,
+écrit en python, qui permet d’écrire assez simplement des requêtes.
+Il est pré installé sur les machines de votre salle de TP.
+Vous pouvez consulter sa documentation en ligne : https://httpie.org/
+
+
+
+
+
+.URIs du service
+[cols="1,2a,2a,2a,2a"]
+|===
+|URI |GET |POST |PUT |DELETE 
+
+|/enseignant
+|Renvoie la liste des enseignants
+|Crée un nouvel enseignant pour pour une structure Json contenant les champs nom et prénom
+|X
+|X
+|===
+
+
+* Complétez la table des URI ci-dessus en fonction du service déployé
+* Lancez l'application
+* Créez 4 enseignants : Yohan Boichut, Frédéric Moal, Matthieu Exbrayat et Vivien Pelletier
+* Créez une formation que vous nommerez comme vous le voulez et vous nommerez un des 4 enseignants comme
+responsable de cette formation
+* Cette formation devra avoir deux groupes de TDs et 3 groupes de TPs
+* Créez deux modules : le premier sera Web services (dont le responsable est Frédéric Moal) et Test et qualité
+(dont le responsable est Yohan Boichut)
+* Associez ces deux modules à la formation que vous avez créée
+* Frédéric Moal doit faire 10 interventions en CM de 1h30
+* Yohan Boichut doit faire 2 interventions de 3h chacune en CM de Test et qualité. Il doit aussi faire 2 séances de TD de heures
+en Web services
+* Matthieu Exbrayat fait deux TDs de Web services de 2h
+* Vivien Pelletier assure 9 séances de TP de 2 heures en Test et qualité. Il fait exactement le même volume en TP pour le
+module Web services.
+* Calculez à l'aide du web service le total heures équivalent tds de chacun des enseignants.
